@@ -1,0 +1,19 @@
+{
+  "name": "BitBurger",
+  "version": "1.0.0",
+  "description": "Lunch Vote Applicatiob using block chain",
+  "main": "gulpfile.js",
+  "dependencies": {
+    "browserify": "^14.4.0",
+    "gulp": "^3.9.1",
+    "mithril": "^1.1.1",
+    "passport": "^0.3.2",
+    "passport-google-oauth": "^1.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "William Gay & Malik Locke",
+  "license": "ISC"
+}
