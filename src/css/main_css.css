@@ -1,14 +1,190 @@
-.nav_bar_main {
+.chat_backboard {
     background-color: #424242;
-   height: 50px;
+    width: auto;
+    height: 415px;
+    margin-bottom: 64px;
+    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 50);
 }
 
-.h1-white{
+.user_display {
+	padding-top: 12px;
+	padding-left: 74px;
+    font-size: 30px !important;
+    font-weight: medium !important;
+    color: #fff !important;   
+     display: inline-block;
+
+}
+
+.message_board {
+    background-color: #fff;
+    width: auto;
+    height: 302px;
+    box-shadow: inset 0px 3px 3px 0px rgba(0, 0, 0, 1);
+    overflow: scroll;
+}
+
+.nav_bar_main {
+    background-color: #424242;
+    height: 50px;
+}
+
+.chat_title {
+    font-size: 36px !important;
+    font-weight: medium !important;
+    color: #fff !important;
+    padding-top: 10px;
+    padding-left: 24px;
+    padding-bottom: 0px;
+}
+
+.h1-white {
     font-size: 36px !important;
     font-weight: medium !important;
     color: #fff !important;
 }
 
-.white{
+.white {
     color: #fff !important;
+}
+
+.input_radio {
+    width: 216px;
+    height: 30px;
+    padding-left: 12px;
+    padding-right: 184px;
+    padding-bottom: 74px;
+    color: #424242;
+    font-size: 18px;
+    font-weight: medium;
+    display: inline-block;
+}
+
+.input_message {
+    width: 600px;
+    height: 40px;
+    background-color: #fff;
+    border: none;
+    color: #424242;
+    font-size: 20px;
+    padding: 12px;
+    box-shadow: inset 0px 3px 3px 0px rgba(0, 0, 0, 1);
+}
+
+.input_message::placeholder {
+    color: #C2C2C2;
+}
+
+.input_add {
+    box-sizing: border-box;
+    width: 345px;
+    height: 50px;
+    background-color: #fff;
+    border-color: #C2C2C2;
+    border-width: 2px;
+    color: #424242;
+    border-style: solid;
+    font-size: 20px;
+    padding: 12px;
+}
+
+.input_add::placeholder {
+    color: #C2C2C2;
+}
+
+.btn_send {
+	margin-left: 12px;
+    border: none;
+    color: #fff;
+    background-color: #2196F3;
+    width: 75px;
+    height: 40px;
+    font-weight: bold;
+    font-size: 13px;
+    text-align: center;
+}
+
+.btn_main {
+    margin-left: 12px;
+    border: none;
+    color: #fff;
+    background-color: #2196F3;
+    width: 136px;
+    height: 50px;
+    font-weight: bold;
+    font-size: 13px;
+    text-align: center;
+}
+
+.btn_main:hover {
+    border: none;
+    color: #fff;
+    background-color: #1576C3;
+}
+
+.btn_second {
+    margin-bottom: 64px;
+    border-width: 1px;
+    border-color: #717171;
+    color: #717171;
+    background-color: #fff;
+    width: 174px;
+    height: 50px;
+    font-weight: bold;
+    font-size: 13px;
+    text-align: center;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 50);
+}
+
+.btn_second:hover {
+    color: #fff;
+    background-color: #717171;
+    box-shadow: 0 -1px 0px 0 rgba(0, 0, 0, 50);
+    animation: btn_fade .25s;
+}
+
+.sub_text {
+    font-size: 14px;
+    color: #9B9B9B;
+    padding-bottom: 12px;
+    padding-top: 24px;
+}
+
+.info_text {
+    font-size: 14px;
+    color: #9B9B9B;
+    padding-top: 12px;
+    padding-bottom: 80px;
+}
+
+.sub_btn_text {
+    padding-left: 12px;
+    font-size: 24px;
+    color: #989898;
+    font-weight: medium;
+}
+
+.lead_text {
+    font-size: 24px;
+    color: #424242;
+}
+
+.lead_sub_text {
+    padding-left: 12px;
+    font-size: 24px;
+    color: #989898;
+    font-weight: medium;
+}
+
+@keyframes btn_fade {
+    0% {
+        color: #717171;
+        background-color: #fff;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 50);
+    }
+    100% {
+        color: #fff;
+        background-color: #717171;
+        box-shadow: 0 -1px 0px 0 rgba(0, 0, 0, 50);
+    }
 }
