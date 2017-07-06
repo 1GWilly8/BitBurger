@@ -15,14 +15,14 @@ module.exports = function(app, db) {
     //     });
     // });
 
-    app.get('/users', (req, res) => {
-        db.collection('users').find({}).toArray((err, documents) => {
+    app.get('/Daily_votes', (req, res) => {
+        db.collection('Daily_votes').find({$natural:-1}) (err, lastEntry) => {
             if (err) {
                 res.send({ 'error': 'An error has occurred' });
             } else {
-                res.send(documents);
+                res.send(lastEntry.getTimestamp());
             }
-        });
+        }
     });
 
     // app.delete('/tasks/:id', (req, res) => {
@@ -37,26 +37,35 @@ module.exports = function(app, db) {
     //     });
     // });
 
-    // app.put('/tasks/:id', (req, res) => {
-    //     const id = req.params.id;
-    //     const details = { '_id': new ObjectID(id) };
-    //     const task = {$set: {}};
-    //     for (key in req.body) {
-    //         task['$set'][key] = req.body[key]
-    //     }
-    //     db.collection('tasks').update(details, task, (err, result) => {
-    //         if (err) {
-    //             res.send({ 'error': 'An error has occurred' });
-    //         } else {
-    //             res.send(task);
-    //         }
-    //     });
-    // });
+    app.put('/Daily_votes/:vote', (req, res) => {
+        const vote = req.params.vote;
+        const details = { '_id': $natural:-1 };
+        const task = {$set: {"uId": vote}};
+        db.collection('tasks').update(details, task, (err, result) => {
+            if (err) {
+                res.send({ 'error': 'An error has occurred' });
+            } else {
+                res.send(task);
+            }
+        });
+    });
 
-    app.post('/users', (req, res) => {
-        const user = { text: req.body.text};
-        console.log(user);
-        db.collection('users').insert(user, (err, result) => {
+    app.post('/Daily_votes', (req, res) => {
+        const new ballotSheet = {"Arrow": "0", "Dustin": "0", "Fioretti": "0", "Gus": "0",
+            "Jeremy": "0", "Koby": "0", "Lafe": "0", "Lamar": "0", "Malik": "0", "Will": "0"};
+        console.log(ballotSheet);
+        db.collection('Daily_votes').insert(ballotSheet, (err, result) => {
+            if (err) {
+                res.send({ 'error': 'An error has occurred' });
+            } else {
+                res.send(result.ops[0]);
+            }
+        });
+    });
+
+    app.post('/Restaurants/:newRestaurant', (req, res) => {
+        const new restaurant = req.params.newRestaurant
+        db.collection('Restaurants').insert(restaurant, (err, result) => {
             if (err) {
                 res.send({ 'error': 'An error has occurred' });
             } else {
@@ -65,3 +74,9 @@ module.exports = function(app, db) {
         });
     });
 };
+
+
+
+//Users[name, remaining votes]
+//Daily_votes[User1's vote, U2's vote, U3 vote, U4v, U5v] "0 by default"
+//Restaurants[Mimi's, Kroger, City, ...]

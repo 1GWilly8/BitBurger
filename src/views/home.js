@@ -21,6 +21,9 @@ var m = require("mithril")
 var profile = require("../models/Profile")
 var locations = require("../models/Locations")
 module.exports = {
+    controller: function() {
+        
+    }
     view: function(vnode) {
         return m("main", [
             m("nav.navbar.navbar-inverse.fixed-top.bg-inverse", [
