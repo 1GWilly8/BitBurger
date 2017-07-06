@@ -1317,77 +1317,101 @@ module.exports = {
 
             ]),
             m(".row", [
-                m(".col-md-4", m("h1", "Choose place:")),
-                m(".col-md-3"),
-                m(".col-md-5", [
-                    m("span", "Current Lead:"),
-                    m("span", "place in lead")
-                ])
+                m(".col-md-2"),
+                m(".col-md-8", [
+                    m(".row", [
+                        m(".col-md-4", m("h1", "Choose place:")),
+                        m(".col-md-3"),
+                        m(".col-md-5", [
+                            m("span.lead_text", "Current Lead:"),
+                            m("span.lead_sub_text", "place in lead")
+                        ])
 
-            ]),
-            m(".row", [
-                m(".col-md-4", m("p", "Click the button next to the place of your choice, To change vote simple click a different Place.")),
-                m(".col-md-3"),
-                m(".col-md-5")
+                    ]),
+                    m(".row", [
+                        m(".col-md-4", m("p.info_text", "Click the button next to the place of your choice, To change vote simple click a different Place.")),
+                        m(".col-md-3"),
+                        m(".col-md-5")
 
-            ]),
-            m("div",
-                m("form", [
-                    locations.location_list.map(function(obj, index) {
-                        return [m("span", [
-                                m("input[type='radio'][name='location']", obj.text)
-                            ]),
-                            m("span", obj),
-                            (index == 2 || index == 5) ? [m("br")] : ""
+                    ]),
+                    m(".row", [
+                        m(".col-md-1"),
+                        m(".col-md-11", [
+                            m("div",
+                                m("form", [
+                                    locations.location_list.map(function(obj, index) {
+                                        return [m("span", [
+                                                m("input[type='radio'][name='location']"),
+                                                m("span.input_radio", obj)
+                                            ]),
+                                            (index == 2 || index == 5) ? [m("br")] : ""
 
-                        ]
-                    })
+                                        ]
+                                    })
 
-                ])
-            ),
-            m("div",[
-                m("p","Don’t See a place you like, add here"),
-                m("input[type=text][placeholder='Location']"),
-                m("span", m("button", "Add")),
-                m("p","Will only Reset with the Agreement of 2/3rds of the group"),
-                m("button", "Reset chocies"),
-                m("span", "Currently 0/3rds")
-                ]),
-
-
-            //
-            m(".modal.fade[aria-labelledby='myModalLabel'][id='sign_in_modal'][role='dialog'][tabindex='-1']",
-                m(".modal-dialog.summary-dialog[role='document']",
-                    m(".modal-content", [
-                        m(".modal-header", [
-                            m("button.close[aria-label='Close'][data-dismiss='modal'][type='button']",
-                                m("span[aria-hidden='true']",
-                                    "×")
-                            ),
-                            m("h4.modal-title[id='myModalLabel']",
-                                "BitBurger Sign In")
-                        ]),
-                        m(".modal-body", [
-                            m("label",
-                                "UserName/E-mail"),
-                            m("input.form-control[type='text']"),
-                            m("label",
-                                "Password"),
-                            m("input.form-control[type='password']")
-                        ]),
-                        m(".modal-footer.summary-footer", [
-                            m("a[href='/auth/google']", { oncreate: m.route.link },
-                                "Sign In with Google"
-                            ),
-                            m("button.btn[type='button']",
-                                "Sign In"),
-                            m("button.btn[data-dismiss='modal'][type='button']",
-                                "Cancel")
+                                ])
+                            )
 
                         ])
-                    ])
-                )
-            )
+
+                    ]),
+                    m("div", [
+                        m("p.sub_text", "Don’t See a place you like, add here"),
+                        m("input.input_add[type=text][placeholder='Location']"),
+                        m("span", m("button.btn_main", "Add")),
+                        m("p.sub_text", "Will only Reset with the Agreement of 2/3rds of the group"),
+                        m("button.btn_second", "Reset chocies"),
+                        m("span.sub_btn_text", "Currently 0/3rds")
+                    ]),
+
+                    m("div.chat_backboard", [
+                        m("h1.chat_title", "Chat:"),
+                        m("div.message_board"),
+                        m("span.user_display", "Malik:"),
+                        m("input.input_message[type=text][placeholder='Type your message here']"),
+                        m("span", m("button.btn_send", "Add")),
+
+
+                    ]),
+
+
+                    //
+                    m(".modal.fade[aria-labelledby='myModalLabel'][id='sign_in_modal'][role='dialog'][tabindex='-1']",
+                        m(".modal-dialog.summary-dialog[role='document']",
+                            m(".modal-content", [
+                                m(".modal-header", [
+                                    m("button.close[aria-label='Close'][data-dismiss='modal'][type='button']",
+                                        m("span[aria-hidden='true']",
+                                            "×")
+                                    ),
+                                    m("h4.modal-title[id='myModalLabel']",
+                                        "BitBurger Sign In")
+                                ]),
+                                m(".modal-body", [
+                                    m("label",
+                                        "UserName/E-mail"),
+                                    m("input.form-control[type='text']"),
+                                    m("label",
+                                        "Password"),
+                                    m("input.form-control[type='password']")
+                                ]),
+                                m(".modal-footer.summary-footer", [
+                                    m("a[href='/auth/google']", { oncreate: m.route.link },
+                                        "Sign In with Google"
+                                    ),
+                                    m("button.btn[type='button']",
+                                        "Sign In"),
+                                    m("button.btn[data-dismiss='modal'][type='button']",
+                                        "Cancel")
+
+                                ])
+                            ])
+                        )
+                    )
+                ]),
+                m(".col-md-2")
+
+            ])
         ])
     }
 }
