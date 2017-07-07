@@ -1232,14 +1232,29 @@ else window.m = m
 var m = require("mithril")
 var Home = require("./views/home")
 
+// window.onload = function() {
+// 	var now = new Date().getTime()
 
 m.route(document.body, "/Home", {
     "/Home": {
         render: function() {
-        return m(Home)
+            return m(Home)
         }
     }
 })
+//     return m.request({
+//         method: "GET",
+//         url: "http://localhost:8000/tasks"
+//     })
+//     .then(function() {
+//     	if(now - response.getTime() >= 86400000) {
+//     		return m.request({
+//     			method: "POST",
+//     			url: ""
+//     		})
+//     	}
+//     })
+// }
 
 },{"./views/home":5,"mithril":1}],3:[function(require,module,exports){
 var m = require("mithril")
@@ -1302,6 +1317,9 @@ var m = require("mithril")
 var profile = require("../models/Profile")
 var locations = require("../models/Locations")
 module.exports = {
+    controller: function() {
+        
+    },
     view: function(vnode) {
         return m("main", [
             m("nav.navbar.navbar-inverse.fixed-top.bg-inverse", [

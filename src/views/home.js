@@ -23,7 +23,7 @@ var locations = require("../models/Locations")
 module.exports = {
     controller: function() {
         
-    }
+    },
     view: function(vnode) {
         return m("main", [
             m("nav.navbar.navbar-inverse.fixed-top.bg-inverse", [
@@ -63,7 +63,7 @@ module.exports = {
                                 m("form", [
                                     locations.location_list.map(function(obj, index) {
                                         return [m("span", [
-                                                m("input[type='radio'][name='location']"),
+                                                m("input.medium[type='radio'][name='location']"),
                                                 m("span.input_radio", obj)
                                             ]),
                                             (index == 2 || index == 5) ? [m("br")] : ""

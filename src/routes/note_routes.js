@@ -3,6 +3,85 @@ var ObjectID = require('mongodb').ObjectID;
 
 
 module.exports = function(app, db) {
+// GET ROUTES
+    app.get('/votes', (req, res) => {
+        db.collection('votes').find({}).toArray((err, documents) => {
+            if (err) {
+                res.send({ 'error': 'An error has occurred' });
+            } else {
+                res.send(documents);
+            }
+        });
+    });
+
+    app.get('/Restaurants', (req, res) => {
+        db.collection('Restaurants').find({}).toArray((err, documents) => {
+            if (err) {
+                res.send({ 'error': 'An error has occurred' });
+            } else {
+                res.send(documents);
+            }
+        });
+    });
+
+    app.get('/messages', (req, res) => {
+        db.collection('messages').find({}).toArray((err, documents) => {
+            if (err) {
+                res.send({ 'error': 'An error has occurred' });
+            } else {
+                res.send(documents);
+            }
+        });
+    });
+
+// POST ROUTES
+    app.post('/votes', (req, res) => {
+        const vote = {
+            user: req.body.user,
+            restaurant: req.body.restaurant
+        };
+        db.collection('votes').insert(vote, (err, result) => {
+            if (err) {
+                res.send({ 'error': 'An error has occurred' });
+            } else {
+                res.send(result.ops[0]);
+            }
+        });
+    });
+};
+
+app.post('/restaurants', (req, res) => {
+    const restaurant = {
+        restaurant: req.body.restaurant,
+        num_of_votes: req.body.numofvotes,
+        is_active: req.body.isactive
+    };
+    db.collection('restaurants').insert(restaurant, (err, result) => {
+        if (err) {
+            res.send({ 'error': 'An error has occurred' });
+        } else {
+            res.send(result.ops[0]);
+        }
+    });
+});
+};
+
+app.post('/messages', (req, res) => {
+    const message = {
+        message: req.body.message,
+        user: req.body.user,
+        date: req.body.date
+    };
+    db.collection('messages').insert(message, (err, result) => {
+        if (err) {
+            res.send({ 'error': 'An error has occurred' });
+        } else {
+            res.send(result.ops[0]);
+        }
+    });
+});
+};
+
     // app.get('/tasks/:id', (req, res) => {
     //     const id = req.params.id;
     //     const details = { '_id': new ObjectID(id) };
@@ -14,16 +93,6 @@ module.exports = function(app, db) {
     //         }
     //     });
     // });
-
-    app.get('/Daily_votes', (req, res) => {
-        db.collection('Daily_votes').find({$natural:-1}) (err, lastEntry) => {
-            if (err) {
-                res.send({ 'error': 'An error has occurred' });
-            } else {
-                res.send(lastEntry.getTimestamp());
-            }
-        }
-    });
 
     // app.delete('/tasks/:id', (req, res) => {
     //     const id = req.params.id;
@@ -37,45 +106,33 @@ module.exports = function(app, db) {
     //     });
     // });
 
-    app.put('/Daily_votes/:vote', (req, res) => {
-        const vote = req.params.vote;
-        const details = { '_id': $natural:-1 };
-        const task = {$set: {"uId": vote}};
-        db.collection('tasks').update(details, task, (err, result) => {
-            if (err) {
-                res.send({ 'error': 'An error has occurred' });
-            } else {
-                res.send(task);
-            }
-        });
-    });
+    // app.put('/Daily_votes/:id', (req, res) => {
+    //     const id = req.params.id;
+    //     const details = { '_id': new ObjectID(id) };
+    //     const vote = { $set: {} };
+    //     for (key in req.body) {
+    //         vote['$set'][key] = req.body[key]
+    //     }
+    //     db.collection('Daily_votes').update(details, vote, (err, result) => {
+    //         if (err) {
+    //             res.send({ 'error': 'An error has occurred' });
+    //         } else {
+    //             res.send(vote);
+    //         }
+    //     });
+    // });
 
-    app.post('/Daily_votes', (req, res) => {
-        const new ballotSheet = {"Arrow": "0", "Dustin": "0", "Fioretti": "0", "Gus": "0",
-            "Jeremy": "0", "Koby": "0", "Lafe": "0", "Lamar": "0", "Malik": "0", "Will": "0"};
-        console.log(ballotSheet);
-        db.collection('Daily_votes').insert(ballotSheet, (err, result) => {
-            if (err) {
-                res.send({ 'error': 'An error has occurred' });
-            } else {
-                res.send(result.ops[0]);
-            }
-        });
-    });
-
-    app.post('/Restaurants/:newRestaurant', (req, res) => {
-        const new restaurant = req.params.newRestaurant
-        db.collection('Restaurants').insert(restaurant, (err, result) => {
-            if (err) {
-                res.send({ 'error': 'An error has occurred' });
-            } else {
-                res.send(result.ops[0]);
-            }
-        });
-    });
-};
-
-
+    // app.post('/daily_votes', (req, res) => {
+    //     const ballotSheet = { user: req.body.user };
+    //     console.log(ballotSheet);
+    //     db.collection('daily_votes').insert(ballotSheet, (err, result) => {
+    //         if (err) {
+    //             res.send({ 'error': 'An error has occurred' });
+    //         } else {
+    //             res.send(result.ops[0]);
+    //         }
+    //     });
+    // });
 
 //Users[name, remaining votes]
 //Daily_votes[User1's vote, U2's vote, U3 vote, U4v, U5v] "0 by default"
