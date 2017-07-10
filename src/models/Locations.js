@@ -1,7 +1,7 @@
 var m = require("mithril")
 
 var Locations = {
-	//location_list: ["Kroger", "Sav's/Chitople", "Joella's", "Kroger", "Sav's/Chitople", "Joella's"],
+    doc_id: "59638a12f36d283e6e74be5b",
 	location_list: null,
 
 	loadList: function() {
@@ -17,6 +17,18 @@ var Locations = {
             
         })
     },
+
+    addLocation: function(newLocation) {
+        const newRes = {"_id": Locations.doc_id, restaurant: newLocation}
+        return m.request({
+            method: "PUT",
+            url: "http://localhost:8000/Restaurants",
+            data: newRes
+        })
+        .then(function(response) {
+            console.log("res", response)
+        })
+    }
  
 }
 module.exports = Locations;

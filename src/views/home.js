@@ -17,6 +17,12 @@
 // })])
 
 // src/views/Layout.js
+var state = {
+    value: "",
+    setValue: function(v) {
+        state.value = v;
+    }
+}
 var m = require("mithril")
 var profile = require("../models/Profile")
 var locations = require("../models/Locations")
@@ -89,8 +95,21 @@ module.exports = {
                     ]),
                     m("div", [
                         m("p.sub_text", "Don’t See a place you like, add here"),
-                        m("input.input_add[type=text][placeholder='Location']"),
-                        m("span", m("button.btn_main", "Add")),
+
+                        m("form[id='newRes']", [
+                            m("input.input_add[type=text][placeholder='Location']", {
+                                oninput: m.withAttr("value", state.setValue),
+                                value: state.value,
+                            })
+                        ]),
+                        m("button.btn_main[type='submit'][form='newRes']", {
+                            onclick: function() {
+                                console.log("To add: ", state.value)
+                                locations.addLocation(state.value)
+                                state.value = ""
+                            }
+                        }, "Add"),
+
                         m("p.sub_text", "Will only Reset with the Agreement of 2/3rds of the group"),
                         m("button.btn_second", "Reset chocies"),
                         m("span.sub_btn_text", "Currently 0/3rds")

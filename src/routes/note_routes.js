@@ -79,17 +79,20 @@ module.exports = function(app, db) {
     });
 
 
-    app.post('/restaurants', (req, res) => {
-        const restaurant = {
-            restaurant: req.body.restaurant,
-            num_of_votes: req.body.numofvotes,
-            is_active: req.body.isactive
-        };
-        db.collection('restaurants').insert(restaurant, (err, result) => {
+    app.put('/Restaurants', (req, res) => {
+        // const restaurant = {
+            // restaurant: req.body.newRes
+            // num_of_votes: req.body.numofvotes,
+            // is_active: req.body.isactive
+        // };
+        id = ObjectId(req.body._id);
+        const details = { '_id': id};
+        const task = {$push: {"restaurants": req.body.restaurant}};
+        db.collection('Restaurants').update(details, task, (err, result) => {
             if (err) {
                 res.send({ 'error': 'An error has occurred' });
             } else {
-                res.send(result.ops[0]);
+                res.send();
             }
         });
     });
