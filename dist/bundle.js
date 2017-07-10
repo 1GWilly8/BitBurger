@@ -1232,21 +1232,8 @@ else window.m = m
 var m = require("mithril")
 var Home = require("./views/home")
 
-window.onload = function() {
-	var now = new Date().getTime()
-    return m.request({
-        method: "GET",
-        url: "http://localhost:8000/tasks"
-    })
-    .then(function() {
-    	if(now - response.getTime() >= 86400000) {
-    		return m.request({
-    			method: "POST",
-    			url: ""
-    		})
-    	}
-    })
-}
+// window.onload = function() {
+// 	var now = new Date().getTime()
 
 m.route(document.body, "/Home", {
     "/Home": {
@@ -1255,21 +1242,37 @@ m.route(document.body, "/Home", {
         }
     }
 })
+//     return m.request({
+//         method: "GET",
+//         url: "http://localhost:8000/tasks"
+//     })
+//     .then(function() {
+//     	if(now - response.getTime() >= 86400000) {
+//     		return m.request({
+//     			method: "POST",
+//     			url: ""
+//     		})
+//     	}
+//     })
+// }
 
 },{"./views/home":5,"mithril":1}],3:[function(require,module,exports){
 var m = require("mithril")
 
 var Locations = {
-	location_list: ["Kroger", "Sav's/Chitople", "Joella's", "Kroger", "Sav's/Chitople", "Joella's"],
-	// location_list: [],
+	//location_list: ["Kroger", "Sav's/Chitople", "Joella's", "Kroger", "Sav's/Chitople", "Joella's"],
+	location_list: null,
 
 	loadList: function() {
         return m.request({
             method: "GET",
-            url: "http://localhost:8000/users",
+            url: "http://localhost:8000/Restaurants",
         })
         .then(function(response) {
-            Locations.location_list = response
+            Locations.location_list = response[0].restaurants
+            // console.log("res", response)
+            // console.log("location_list", Locations.location_list)
+            m.redraw()
             
         })
     },
@@ -1277,23 +1280,46 @@ var Locations = {
 }
 module.exports = Locations;
 },{"mithril":1}],4:[function(require,module,exports){
-// var m = require("mithril")
+var m = require("mithril")
 
-// var Profile = {
-//  is_signedIn: false,
-//  user_name: "",
+var Profile = {
+    is_signedIn: false,
+    user_name: "",
+    user_id: "59639d01f36d283e6e74cb27",
 
-//  sign_in: function(){
-//  }
+    oninit: function() {
+    	console.log("/Users init")
+    	return m.request({
+            method: "GET",
+            url: "http://localhost:8000/Users",
+        })
+    },
 
-//  log_out: function(){
-//  	is_signedIn = false;
-//  	user_name = "";
-//  	window.location.reload(true);
-//  }
-// }
-// module.exports = Profile;
-},{}],5:[function(require,module,exports){
+    castVote: function(place) {
+    	var vote = {"_id": Profile.user_id, "place": place}
+    	return m.request({
+            method: "PUT",
+            url: "http://localhost:8000/Users",
+            data: vote,
+        })
+        .then(function(response) {
+            console.log("res", response)
+            // console.log("location_list", Locations.location_list)
+            m.redraw()
+            
+        })
+    }
+    // sign_in: function() {}
+
+    //     log_out: function() {
+    //     is_signedIn = false;
+    //     user_name = "";
+    //     window.location.reload(true);
+    // }
+}
+module.exports = Profile;
+
+},{"mithril":1}],5:[function(require,module,exports){
 // var m = require("mithril")
 
 // m.mount("form", [
@@ -1317,8 +1343,11 @@ var m = require("mithril")
 var profile = require("../models/Profile")
 var locations = require("../models/Locations")
 module.exports = {
+    oninit: function() {
+        locations.loadList()
+    },
     // controller: function() {
-        
+
     // }
     view: function(vnode) {
         return m("main", [
@@ -1357,10 +1386,17 @@ module.exports = {
                         m(".col-md-11", [
                             m("div",
                                 m("form", [
-                                    locations.location_list.map(function(obj, index) {
+                                    locations.location_list && locations.location_list.map(function(obj, index) {
+                                        // console.log("obj", obj)
+                                        // console.log("index", index)
                                         return [m("span", [
-                                                m("input[type='radio'][name='location']"),
-                                                m("span.input_radio", obj)
+                                                m("input.medium[type='radio'][name='location']", {
+                                                    onclick: function() {
+                                                        profile.castVote(obj)
+                                                        console.log("clicked", obj)
+                                                    }
+                                                }),
+                                                m("span.input_radio[name='restaruant']", obj)
                                             ]),
                                             (index == 2 || index == 5) ? [m("br")] : ""
 

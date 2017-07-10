@@ -21,8 +21,11 @@ var m = require("mithril")
 var profile = require("../models/Profile")
 var locations = require("../models/Locations")
 module.exports = {
+    oninit: function() {
+        locations.loadList()
+    },
     // controller: function() {
-        
+
     // }
     view: function(vnode) {
         return m("main", [
@@ -61,10 +64,17 @@ module.exports = {
                         m(".col-md-11", [
                             m("div",
                                 m("form", [
-                                    locations.location_list.map(function(obj, index) {
+                                    locations.location_list && locations.location_list.map(function(obj, index) {
+                                        // console.log("obj", obj)
+                                        // console.log("index", index)
                                         return [m("span", [
-                                                m("input[type='radio'][name='location']"),
-                                                m("span.input_radio", obj)
+                                                m("input.medium[type='radio'][name='location']", {
+                                                    onclick: function() {
+                                                        profile.castVote(obj)
+                                                        console.log("clicked", obj)
+                                                    }
+                                                }),
+                                                m("span.input_radio[name='restaruant']", obj)
                                             ]),
                                             (index == 2 || index == 5) ? [m("br")] : ""
 

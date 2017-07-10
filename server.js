@@ -11,6 +11,12 @@ app.use(express.static(path.join(__dirname, '/')));
 app.get(express.static(path.join(__dirname, '/')));
 const port = 8000;
 
+app.use(function(req, res, next) {
+   res.header("Access-Control-Allow-Origin", "*");
+   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+   next();
+});
+
 // Add headers
 app.use(function (req, res, next) {
 

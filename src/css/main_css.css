@@ -1,3 +1,5 @@
+@import "compass/css3";
+
 .chat_backboard {
     background-color: #424242;
     width: auto;
@@ -7,7 +9,6 @@
 }
 
 .user_display {
-	padding-top: 12px;
 	padding-left: 74px;
     font-size: 30px !important;
     font-weight: medium !important;
