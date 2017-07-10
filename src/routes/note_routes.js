@@ -41,7 +41,7 @@ module.exports = function(app, db) {
         const vote = req.params.vote;
         const details = { '_id': $natural:-1 };
         const task = {$set: {"uId": vote}};
-        db.collection('tasks').update(details, task, (err, result) => {
+        db.collection('tasks').updateOne(details, task, (err, result) => {
             if (err) {
                 res.send({ 'error': 'An error has occurred' });
             } else {
