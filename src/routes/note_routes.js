@@ -2,7 +2,7 @@
 var ObjectId = require('mongodb').ObjectID;
 
 
-module.exports = function(app, db) {
+module.exports = function(app, db, fayeClient) {
     // GET ROUTES
     app.get('/votes', (req, res) => {
         db.collection('votes').find({}).toArray((err, documents) => {
@@ -34,6 +34,14 @@ module.exports = function(app, db) {
     //     db.collection('tasks').updateOne(details, task, (err, result) => {
 
     app.get('/Restaurants', (req, res) => {
+        /**
+            -   http://localhost:8000/faye
+                o   message => /test
+        */
+        fayeClient.publish("/test", {
+            text: 'Hello world'
+        });
+
         db.collection('Restaurants').find({}).toArray((err, documents) => {
             if (err) {
                 res.send({ 'error': 'An error has occurred' });
@@ -55,7 +63,7 @@ module.exports = function(app, db) {
 
     app.get('/Users/:docId', (req, res) => {
         id = ObjectId(req.params.docId);
-        const details = {'_id': id};
+        const details = { '_id': id };
         db.collection('Users').find(details).toArray((err, documents) => {
             if (err) {
                 res.send({ 'error': 'An error has occurred' });
@@ -78,8 +86,8 @@ module.exports = function(app, db) {
     // PUT ROUTES
     app.put('/Users', (req, res) => {
         id = ObjectId(req.body._id);
-        const details = { '_id': id};
-        const task = {$set: {"vote": req.body.place}};
+        const details = { '_id': id };
+        const task = { $set: { "vote": req.body.place } };
         db.collection('Users').update(details, task, (err, result) => {
             if (err) {
                 res.send({ 'error': err });
@@ -93,13 +101,13 @@ module.exports = function(app, db) {
 
     app.put('/Restaurants', (req, res) => {
         // const restaurant = {
-            // restaurant: req.body.newRes
-            // num_of_votes: req.body.numofvotes,
-            // is_active: req.body.isactive
+        // restaurant: req.body.newRes
+        // num_of_votes: req.body.numofvotes,
+        // is_active: req.body.isactive
         // };
         id = ObjectId(req.body._id);
-        const details = { '_id': id};
-        const task = {$push: {"restaurants": req.body.restaurant}};
+        const details = { '_id': id };
+        const task = { $push: { "restaurants": req.body.restaurant } };
         db.collection('Restaurants').update(details, task, (err, result) => {
             if (err) {
                 res.send({ 'error': 'An error has occurred' });

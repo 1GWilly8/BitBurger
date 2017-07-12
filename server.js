@@ -17,14 +17,15 @@ app.use(function(req, res, next) {
    next();
 });
 
-var http = require('http'),
-    faye = require('faye');
+var http = require('http');
+var faye = require('faye');
 
-var server = http.createServer(),
-    bayeux = new faye.NodeAdapter({mount: '/'});
+var server = http.createServer(app);
+var bayeux = new faye.NodeAdapter({mount: '/faye'});
 
 bayeux.attach(server);
-server.listen(8000);
+
+fayeClient = bayeux.getClient();
 
 
 // Add headers
@@ -51,8 +52,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 MongoClient.connect(db.url, (err, database) => {
   if (err) return console.log(err)
-  require('./src/routes')(app, database);
-  app.listen(port, () => {
+  require('./src/routes')(app, database, fayeClient);
+  server.listen(port, () => {
     console.log('We are live on ' + port);
   });               
 })

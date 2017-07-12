@@ -1,5 +1,10 @@
 var m = require("mithril")
 var Home = require("./views/home")
+var faye = require("faye");
+var client = new faye.Client("http://localhost:8000/faye");
+client.subscribe("/test", function(message) {
+    alert('Got a message: ' + message.text);
+});
 
 // window.onload = function() {
 // 	var now = new Date().getTime()
@@ -12,15 +17,8 @@ m.route(document.body, "/Home", {
     }
 })
 
-var client = new Faye.Client('http://localhost:8000/');
 
-client.subscribe('/messages', function(message) {
-  alert('Got a message: ' + message.text);
-});
 
-client.publish('/messages', {
-  text: 'Hello world'
-});
 
 //     return m.request({
 //         method: "GET",
