@@ -53,6 +53,18 @@ module.exports = function(app, db) {
         });
     });
 
+    app.get('/Users/:docId', (req, res) => {
+        id = ObjectId(req.params.docId);
+        const details = {'_id': id};
+        db.collection('Users').find(details).toArray((err, documents) => {
+            if (err) {
+                res.send({ 'error': 'An error has occurred' });
+            } else {
+                res.send(documents);
+            }
+        });
+    });
+
     app.get('/messages', (req, res) => {
         db.collection('messages').find({}).toArray((err, documents) => {
             if (err) {
@@ -63,7 +75,7 @@ module.exports = function(app, db) {
         });
     });
 
-    // POST ROUTES
+    // PUT ROUTES
     app.put('/Users', (req, res) => {
         id = ObjectId(req.body._id);
         const details = { '_id': id};
@@ -97,7 +109,7 @@ module.exports = function(app, db) {
         });
     });
 
-
+    // POST ROUTES
     app.post('/messages', (req, res) => {
         const message = {
             message: req.body.message,

@@ -1242,6 +1242,17 @@ m.route(document.body, "/Home", {
         }
     }
 })
+
+var client = new Faye.Client('http://localhost:8000/');
+
+client.subscribe('/messages', function(message) {
+  alert('Got a message: ' + message.text);
+});
+
+client.publish('/messages', {
+  text: 'Hello world'
+});
+
 //     return m.request({
 //         method: "GET",
 //         url: "http://localhost:8000/tasks"
@@ -1256,41 +1267,72 @@ m.route(document.body, "/Home", {
 //     })
 // }
 
-},{"./views/home":5,"mithril":1}],3:[function(require,module,exports){
+},{"./views/home":6,"mithril":1}],3:[function(require,module,exports){
 var m = require("mithril")
 
 var Locations = {
-    doc_id: "59638a12f36d283e6e74be5b",
-	location_list: null,
+    locations_doc_id: "59638a12f36d283e6e74be5b",
+    location_list: null,
+    todays_locations: [],
 
-	loadList: function() {
+    loadList: function() {
         return m.request({
-            method: "GET",
-            url: "http://localhost:8000/Restaurants",
-        })
-        .then(function(response) {
-            Locations.location_list = response[0].restaurants
-            // console.log("res", response)
-            // console.log("location_list", Locations.location_list)
-            m.redraw()
-            
-        })
+                method: "GET",
+                url: "http://localhost:8000/Restaurants",
+            })
+            .then(function(response) {
+                Locations.location_list = response[0].restaurants
+                const numChoices = Math.floor((Math.random() * 3) + 3)
+                console.log("Num Options", numChoices)
+                const locListLen = Locations.location_list.length
+                var candidate = null
+                var pass = false
+                for (var i = 1; i <= numChoices; i++) {
+                    candidate = Math.floor((Math.random() * locListLen))
+                    for (var j = 0; j <= Locations.todays_locations.length; j++) {
+                        // console.log(Locations.todays_locations[j])
+                        // console.log(Locations.location_list[candidate])
+                        if (Locations.todays_locations[j] == Locations.location_list[candidate]) {
+                            pass = true
+                            console.log("duplicate")
+                            i--
+                        }
+                    }
+                    if (!pass) {
+                        Locations.todays_locations.push(Locations.location_list[candidate])
+                        //console.log("iteration", Locations.todays_locations)
+                    } else {
+                        pass = false
+                    }
+                }
+                m.redraw()
+
+            })
     },
 
+    // selectTodaysLocations: function() {
+    //     const numChoices = Math.floor((Math.random() * 5) + 3)
+    //     const locListLen = Locations.location_list.length()
+    //     for (var i = 1; i <= numChoices; i++) {
+    //         Locations.todays_locations.append(Locations.location_list(Math.floor((Math.random() * locListLen))))
+    //     }
+    // },
+
     addLocation: function(newLocation) {
-        const newRes = {"_id": Locations.doc_id, restaurant: newLocation}
+        const newRes = { "_id": Locations.locations_doc_id, restaurant: newLocation }
         return m.request({
-            method: "PUT",
-            url: "http://localhost:8000/Restaurants",
-            data: newRes
-        })
-        .then(function(response) {
-            console.log("res", response)
-        })
+                method: "PUT",
+                url: "http://localhost:8000/Restaurants",
+                data: newRes
+            })
+            .then(function(response) {
+                
+            })
     }
- 
+
 }
 module.exports = Locations;
+
 },{"mithril":1}],4:[function(require,module,exports){
 var m = require("mithril")
 
@@ -1332,6 +1374,90 @@ var Profile = {
 module.exports = Profile;
 
 },{"mithril":1}],5:[function(require,module,exports){
+var m = require("mithril")
+
+var Users = {
+    users_doc_id: "595e65fd734d1d25634234d3",
+    users_list: [],
+    vote_tally: [],
+    vote_count: [],
+    voteLead: "",
+
+    getUsers: function() {
+        var rmIdValue = true
+        return m.request({
+                method: "GET",
+                url: "http://localhost:8000/Users/" + Users.users_doc_id
+            })
+            .then(function(response) {
+                for (key in response[0]) {
+                    if (!rmIdValue) {
+                        Users.users_list.push(response[0][key])
+                    } else {
+                    	rmIdValue = false
+                    }
+                }
+                Users.countVotes()
+            })
+    },
+
+    getVotes: function() {
+        // console.log("here", Users.users_list)
+        for (var i = 0; i < Users.users_list.length; i++) {
+            // console.log("there", Users.users_list[i])
+            m.request({
+                method: "GET",
+                url: "http://localhost:8000/Users/" + Users.users_list[i]
+            })
+            .then(function(response) {
+                Users.vote_tally.push(response[0].vote)
+                // console.log("res", Users.vote_tally)
+        // Users.countVotes()
+            })
+        }
+    },
+
+    countVotes: function() {
+        Users.getVotes()
+        var maxVotes = 0
+        var curLead = ""
+        for (var i = 0; i < Users.vote_tally.length; i++) {
+            console.log("e For 1")
+            if (Users.vote_tally[i] != "") {
+                console.log("e If 1")
+                var curTally = 1
+                for (var j = i + 1; j < Users.vote_tally.length; j++) {
+                    console.log("e For 2")
+                    if (Users.vote_tally[i] == Users.vote_tally[j]) {
+                        console.log("e If 2"),
+                        curTally++
+                    }
+                }
+                if (curTally > maxVotes) {
+                    curLead = Users.vote_tally[i],
+                    maxVotes = curTally
+                }
+            }
+        }
+        voteLead = curLead
+        console.log("lead: ", curLead)
+    },
+
+    diff: function() {
+        var tmpVotes = []
+        tmpVotes.push(Users.vote_tally)
+        Users.getVotes()
+        console.log("tmpVotes", tmpVotes)
+        console.log("Users.vote_tally", Users.vote_tally)
+        if (tmpVotes != Users.vote_tally) {
+            // Users.countVotes()
+        }
+    }
+}
+
+module.exports = Users;
+
+},{"mithril":1}],6:[function(require,module,exports){
 // var m = require("mithril")
 
 // m.mount("form", [
@@ -1360,9 +1486,17 @@ var state = {
 var m = require("mithril")
 var profile = require("../models/Profile")
 var locations = require("../models/Locations")
+var users = require("../models/Users")
 module.exports = {
     oninit: function() {
         locations.loadList()
+        //locations.selectTodaysLocations()
+        users.getUsers()
+        users.countVotes()
+    },
+
+    onupdate: function() {
+        //users.diff()
     },
     // controller: function() {
 
@@ -1389,7 +1523,9 @@ module.exports = {
                         m(".col-md-3"),
                         m(".col-md-5", [
                             m("span.lead_text", "Current Lead:"),
-                            m("span.lead_sub_text", "place in lead")
+                            m("span.lead_sub_text", {
+                                value: users.voetLead,
+                            })
                         ])
 
                     ]),
@@ -1404,7 +1540,7 @@ module.exports = {
                         m(".col-md-11", [
                             m("div",
                                 m("form", [
-                                    locations.location_list && locations.location_list.map(function(obj, index) {
+                                    locations.todays_locations && locations.todays_locations.map(function(obj, index) {
                                         // console.log("obj", obj)
                                         // console.log("index", index)
                                         return [m("span", [
@@ -1501,4 +1637,4 @@ module.exports = {
     }
 }
 
-},{"../models/Locations":3,"../models/Profile":4,"mithril":1}]},{},[2]);
+},{"../models/Locations":3,"../models/Profile":4,"../models/Users":5,"mithril":1}]},{},[2]);

@@ -26,9 +26,17 @@ var state = {
 var m = require("mithril")
 var profile = require("../models/Profile")
 var locations = require("../models/Locations")
+var users = require("../models/Users")
 module.exports = {
     oninit: function() {
         locations.loadList()
+        //locations.selectTodaysLocations()
+        users.getUsers()
+        users.countVotes()
+    },
+
+    onupdate: function() {
+        //users.diff()
     },
     // controller: function() {
 
@@ -55,7 +63,9 @@ module.exports = {
                         m(".col-md-3"),
                         m(".col-md-5", [
                             m("span.lead_text", "Current Lead:"),
-                            m("span.lead_sub_text", "place in lead")
+                            m("span.lead_sub_text", {
+                                value: users.voetLead,
+                            })
                         ])
 
                     ]),
@@ -70,7 +80,7 @@ module.exports = {
                         m(".col-md-11", [
                             m("div",
                                 m("form", [
-                                    locations.location_list && locations.location_list.map(function(obj, index) {
+                                    locations.todays_locations && locations.todays_locations.map(function(obj, index) {
                                         // console.log("obj", obj)
                                         // console.log("index", index)
                                         return [m("span", [

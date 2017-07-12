@@ -11,6 +11,17 @@ m.route(document.body, "/Home", {
         }
     }
 })
+
+var client = new Faye.Client('http://localhost:8000/');
+
+client.subscribe('/messages', function(message) {
+  alert('Got a message: ' + message.text);
+});
+
+client.publish('/messages', {
+  text: 'Hello world'
+});
+
 //     return m.request({
 //         method: "GET",
 //         url: "http://localhost:8000/tasks"
