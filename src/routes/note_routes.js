@@ -38,9 +38,9 @@ module.exports = function(app, db, fayeClient) {
             -   http://localhost:8000/faye
                 o   message => /test
         */
-        fayeClient.publish("/test", {
-            text: 'Hello world'
-        });
+        // fayeClient.publish("/test", {
+        //     text: 'Hello world'
+        // });
 
         db.collection('Restaurants').find({}).toArray((err, documents) => {
             if (err) {
@@ -88,6 +88,11 @@ module.exports = function(app, db, fayeClient) {
         id = ObjectId(req.body._id);
         const details = { '_id': id };
         const task = { $set: { "vote": req.body.place } };
+
+        fayeClient.publish("/test", {
+            text: req.body.place
+        });
+
         db.collection('Users').update(details, task, (err, result) => {
             if (err) {
                 res.send({ 'error': err });
@@ -105,6 +110,12 @@ module.exports = function(app, db, fayeClient) {
         // num_of_votes: req.body.numofvotes,
         // is_active: req.body.isactive
         // };
+
+        console.log("entered add rest API")
+        fayeClient.publish("/addRest", {
+            text: req.body.restaurant
+        });
+
         id = ObjectId(req.body._id);
         const details = { '_id': id };
         const task = { $push: { "restaurants": req.body.restaurant } };

@@ -1,5 +1,4 @@
 @import "compass/css3";
-
 .chat_backboard {
     background-color: #424242;
     width: auto;
@@ -9,12 +8,11 @@
 }
 
 .user_display {
-	padding-left: 74px;
+    padding-left: 74px;
     font-size: 30px !important;
     font-weight: medium !important;
-    color: #fff !important;   
-     display: inline-block;
-
+    color: #fff !important;
+    display: inline-block;
 }
 
 .message_board {
@@ -94,7 +92,7 @@
 }
 
 .btn_send {
-	margin-left: 12px;
+    margin-left: 12px;
     border: none;
     color: #fff;
     background-color: #2196F3;
@@ -176,6 +174,90 @@
     color: #989898;
     font-weight: medium;
 }
+
+.vertical_break_sm {
+    margin-right: -15px;
+    margin-left: -15px;
+    height: 12px;
+}
+
+.vertical_break_md {
+    margin-right: -15px;
+    margin-left: -15px;
+    height: 24px;
+}
+
+.vertical_break_lg {
+    margin-right: -15px;
+    margin-left: -15px;
+    height: 48px;
+}
+
+.radio_btn_spl {
+    height: 30px;
+    width: 30px;
+    background: url('./img/BitBurger_radio_btn_unchecked.png');
+}
+
+body{color:#444;font:100%/1.4 sans-serif;}
+
+
+/* CUSTOM RADIO & CHECKBOXES
+   http://stackoverflow.com/a/17541916/383904 */
+.rad,
+.ckb{
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+.rad > input,
+.ckb > input{ /* HIDE ORG RADIO & CHECKBOX */
+  visibility: hidden;
+  position: absolute;
+}
+/* RADIO & CHECKBOX STYLES */
+.rad > i,
+.ckb > i{     /* DEFAULT <i> STYLE */
+  display: inline-block;
+  vertical-align: middle;
+  width:  16px;
+  height: 16px;
+  border-radius: 50%;
+  transition: 0.2s;
+  box-shadow: inset 0 0 0 8px #fff;
+  border: 1px solid gray;
+  background: gray;
+}
+/* CHECKBOX OVERWRITE STYLES */
+.ckb > i {
+  width: 25px;
+  border-radius: 3px;
+}
+.rad:hover > i{ /* HOVER <i> STYLE */
+  box-shadow: inset 0 0 0 3px #fff;
+  background: gray;
+}
+.rad > input:checked + i{ /* (RADIO CHECKED) <i> STYLE */
+  box-shadow: inset 0 0 0 3px #fff;
+  background: orange;
+}
+/* CHECKBOX */
+.ckb > input + i:after{
+  content: "";
+  display: block;
+  height: 12px;
+  width:  12px;
+  margin: 2px;
+  border-radius: inherit;
+  transition: inherit;
+  background: gray;
+}
+.ckb > input:checked + i:after{ /* (RADIO CHECKED) <i> STYLE */
+  margin-left: 11px;
+  background:  orange;
+}
+
 
 @keyframes btn_fade {
     0% {

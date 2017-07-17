@@ -1,9 +1,11 @@
 var m = require("mithril")
+var users = require("./Users")
 
 var Profile = {
     is_signedIn: false,
     user_name: "",
     user_id: "59639d01f36d283e6e74cb27",
+    resetVote: false,
 
     oninit: function() {
     	console.log("/Users init")
@@ -26,6 +28,13 @@ var Profile = {
             m.redraw()
             
         })
+    },
+
+    voteForReset: function() {
+        if (!Profile.resetVote) {
+            users.reset_vote.push("aye")
+            Profile.resetVote = true
+        }
     }
     // sign_in: function() {}
 

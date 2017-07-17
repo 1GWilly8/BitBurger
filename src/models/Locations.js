@@ -1,4 +1,5 @@
 var m = require("mithril")
+var users = require("./Users")
 
 var Locations = {
     locations_doc_id: "59638a12f36d283e6e74be5b",
@@ -6,6 +7,7 @@ var Locations = {
     todays_locations: [],
 
     loadList: function() {
+        Locations.todays_locations = []
         return m.request({
                 method: "GET",
                 url: "http://localhost:8000/Restaurants",
@@ -56,9 +58,18 @@ var Locations = {
                 data: newRes
             })
             .then(function(response) {
-                
-            })
-    }
 
+            })
+    },
+
+    resetLocations: function() {
+        if (users.numUsers == 0) {
+            users.getUsers()
+        }
+        console.log("votes: ", users.reset_vote.length)
+        if (Math.floor(users.numUsers * (2 / 3)) <= users.reset_vote.length) {
+            Locations.loadList()
+        }
+    }
 }
 module.exports = Locations;

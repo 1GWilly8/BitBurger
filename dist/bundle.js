@@ -4097,11 +4097,11 @@ else window.m = m
 },{}],39:[function(require,module,exports){
 var m = require("mithril")
 var Home = require("./views/home")
-var faye = require("faye");
-var client = new faye.Client("http://localhost:8000/faye");
-client.subscribe("/test", function(message) {
-    alert('Got a message: ' + message.text);
-});
+// var faye = require("faye");
+// var client = new faye.Client("http://localhost:8000/faye");
+// client.subscribe("/test", function(message) {
+//     alert('Got a message: ' + message.text);
+// });
 
 // window.onload = function() {
 // 	var now = new Date().getTime()
@@ -4131,8 +4131,9 @@ m.route(document.body, "/Home", {
 //     })
 // }
 
-},{"./views/home":43,"faye":3,"mithril":38}],40:[function(require,module,exports){
+},{"./views/home":43,"mithril":38}],40:[function(require,module,exports){
 var m = require("mithril")
+var users = require("./Users")
 
 var Locations = {
     locations_doc_id: "59638a12f36d283e6e74be5b",
@@ -4140,6 +4141,7 @@ var Locations = {
     todays_locations: [],
 
     loadList: function() {
+        Locations.todays_locations = []
         return m.request({
                 method: "GET",
                 url: "http://localhost:8000/Restaurants",
@@ -4190,20 +4192,30 @@ var Locations = {
                 data: newRes
             })
             .then(function(response) {
-                
-            })
-    }
 
+            })
+    },
+
+    resetLocations: function() {
+        if (users.numUsers == 0) {
+            users.getUsers()
+        }
+        console.log("votes: ", users.reset_vote.length)
+        if (Math.floor(users.numUsers * (2 / 3)) <= users.reset_vote.length) {
+            Locations.loadList()
+        }
+    }
 }
 module.exports = Locations;
-
-},{"mithril":38}],41:[function(require,module,exports){
+},{"./Users":42,"mithril":38}],41:[function(require,module,exports){
 var m = require("mithril")
+var users = require("./Users")
 
 var Profile = {
     is_signedIn: false,
     user_name: "",
     user_id: "59639d01f36d283e6e74cb27",
+    resetVote: false,
 
     oninit: function() {
     	console.log("/Users init")
@@ -4226,6 +4238,13 @@ var Profile = {
             m.redraw()
             
         })
+    },
+
+    voteForReset: function() {
+        if (!Profile.resetVote) {
+            users.reset_vote.push("aye")
+            Profile.resetVote = true
+        }
     }
     // sign_in: function() {}
 
@@ -4237,7 +4256,7 @@ var Profile = {
 }
 module.exports = Profile;
 
-},{"mithril":38}],42:[function(require,module,exports){
+},{"./Users":42,"mithril":38}],42:[function(require,module,exports){
 var m = require("mithril")
 
 var Users = {
@@ -4245,9 +4264,12 @@ var Users = {
     users_list: [],
     vote_tally: [],
     vote_count: [],
+    reset_vote: [],
     voteLead: "",
+    numUsers: 0,
 
     getUsers: function() {
+        numUsers = 0
         var rmIdValue = true
         return m.request({
                 method: "GET",
@@ -4256,44 +4278,49 @@ var Users = {
             .then(function(response) {
                 for (key in response[0]) {
                     if (!rmIdValue) {
+                        Users.numUsers++
+                        // console.log("users++", Users.numUsers)
                         Users.users_list.push(response[0][key])
                     } else {
                     	rmIdValue = false
                     }
                 }
-                Users.countVotes()
             })
     },
 
     getVotes: function() {
-        // console.log("here", Users.users_list)
+        if (Users.vote_tally != []) {
+            Users.vote_tally = []
+        }
+        console.log("getVote initiated")
+        var counter = 1
         for (var i = 0; i < Users.users_list.length; i++) {
-            // console.log("there", Users.users_list[i])
             m.request({
                 method: "GET",
                 url: "http://localhost:8000/Users/" + Users.users_list[i]
             })
             .then(function(response) {
+                counter++
                 Users.vote_tally.push(response[0].vote)
-                // console.log("res", Users.vote_tally)
-        // Users.countVotes()
+                if (counter == Users.users_list.length) {
+                    Users.countVotes()
+                }
             })
         }
     },
 
     countVotes: function() {
-        Users.getVotes()
+        // console.log("####### count initiated #######")
+        // console.log("U.vote_tally", Users.vote_tally)
         var maxVotes = 0
         var curLead = ""
         for (var i = 0; i < Users.vote_tally.length; i++) {
-            console.log("e For 1")
             if (Users.vote_tally[i] != "") {
-                console.log("e If 1")
                 var curTally = 1
                 for (var j = i + 1; j < Users.vote_tally.length; j++) {
-                    console.log("e For 2")
                     if (Users.vote_tally[i] == Users.vote_tally[j]) {
-                        console.log("e If 2"),
+                        // console.log("count: ", Users.vote_tally[i], curTally + 1)
+                        Users.vote_tally[j] = ""
                         curTally++
                     }
                 }
@@ -4303,26 +4330,28 @@ var Users = {
                 }
             }
         }
-        voteLead = curLead
-        console.log("lead: ", curLead)
+        Users.voteLead = curLead
+        // console.log("lead: ", curLead)
     },
 
-    diff: function() {
-        var tmpVotes = []
-        tmpVotes.push(Users.vote_tally)
-        Users.getVotes()
-        console.log("tmpVotes", tmpVotes)
-        console.log("Users.vote_tally", Users.vote_tally)
-        if (tmpVotes != Users.vote_tally) {
-            // Users.countVotes()
-        }
-    }
+    // diff: function() {
+    //     var tmpVotes = []
+    //     tmpVotes.push(Users.vote_tally)
+    //     Users.getVotes()
+    //     console.log("tmpVotes", tmpVotes)
+    //     console.log("Users.vote_tally", Users.vote_tally)
+    //     if (tmpVotes != Users.vote_tally) {
+    //         // Users.countVotes()
+    //     }
+    // }
 }
 
 module.exports = Users;
 
 },{"mithril":38}],43:[function(require,module,exports){
-// var m = require("mithril")
+var m = require("mithril")
+
+var faye = require("faye");
 
 // m.mount("form", [
 //  m("input['type=text', 'name=identifier']"),
@@ -4351,12 +4380,33 @@ var m = require("mithril")
 var profile = require("../models/Profile")
 var locations = require("../models/Locations")
 var users = require("../models/Users")
+
+var client = new faye.Client("http://localhost:8000/faye");
+
+function locationClick(obj) {
+    profile.castVote(obj);
+    // console.log("clicked", "   " + obj);
+    return;
+};
+
+client.subscribe("/test", function(message) {
+    // console.log('Got a message: ' + message.text);
+    users.getVotes()
+});
+
+client.subscribe("/addRest", function(message) {
+    // console.log('Got a new opt for today: ' + message.text);
+    locations.todays_locations.push(message.text)
+    m.redraw()
+    users.getVotes()
+});
+
 module.exports = {
     oninit: function() {
         locations.loadList()
         //locations.selectTodaysLocations()
         users.getUsers()
-        users.countVotes()
+        users.getVotes()
     },
 
     onupdate: function() {
@@ -4368,96 +4418,84 @@ module.exports = {
     view: function(vnode) {
         return m("main", [
             m("nav.navbar.navbar-inverse.fixed-top.bg-inverse", [
-                m("a.navbar-brand[href='#']", [
-                    m("span", m("img[src='src/img/Bitburger_Logo.png'][width='30'][height='30'][class='d-inline-block align-top'][alt='']")),
-                    "BitBurger"
-                ]),
-                m("a.navbar-right[data-target='#sign_in_modal'][data-toggle='modal']",
-                    m("img[src='src/img/signIn_Button.png'][width='40'][height='40']")),
-                // (profile.is_signedIn) ? [
-                //     m("h3.navbar-right", "Hello, " + profile.user_name)
-                // ] : [m("h3.navbar-right", "Sign In/Create Account")]
+                m("div.container", [
+                    m("a.navbar-brand[href='#']", [
+                        m("span", m("img[src='src/img/Bitburger_Logo.png'][width='30'][height='30'][class='d-inline-block align-top'][alt='']")),
+                        "BitBurger"
+                    ]),
+                    m("a.navbar-right[data-target='#sign_in_modal'][data-toggle='modal']",
+                        m("img[src='src/img/signIn_Button.png'][width='40'][height='40']")),
+                    // (profile.is_signedIn) ? [
+                    //     m("h3.navbar-right", "Hello, " + profile.user_name)
+                    // ] : [m("h3.navbar-right", "Sign In/Create Account")]
+                ])
 
             ]),
-            m(".row", [
-                m(".col-md-2"),
+            m("div.container", [
                 m(".col-md-8", [
                     m(".row", [
-                        m(".col-md-4", m("h1", "Choose place:")),
+                        m(".col-md-6", m("h1", "Today's options:")),
                         m(".col-md-3"),
                         m(".col-md-5", [
-                            m("span.lead_text", "Current Lead:"),
-                            m("span.lead_sub_text", {
-                                value: users.voetLead,
-                            })
+                            m("span.lead_text", "Current Lead: " + users.voteLead)
                         ])
-
                     ]),
-                    m(".row", [
-                        m(".col-md-4", m("p.info_text", "Click the button next to the place of your choice, To change vote simple click a different Place.")),
-                        m(".col-md-3"),
-                        m(".col-md-5")
+                    m("p", "Click the button next to the place of your choice, To change vote simple click a different Place."),
+                    m(".vertical_break_md"),
+                    m(".container col-md-12 h-50", [
+                        // m(".col-md-1"),
+                        // m(".col-md-11 .h-25", [
+                        m("div[id='radio_box']",
+                            locations.todays_locations && locations.todays_locations.map(function(obj, index) {
+                                // console.log("obj", obj)
+                                // console.log("index", index)
+                                return [m("span.col-md-4", [
+                                        m("input[type='radio'][name='location']", {
+                                            onclick: function() {
+                                                profile.castVote(obj)
+                                                console.log("clicked", "   " + obj)
+                                            }
+                                        }),
+                                        m("span.medium", "   " + obj),
+                                        m(".vertical_break_sm")
+                                    ]),
+                                    (index == 2 || index == 5) ? [m("br")] : ""
 
-                    ]),
-                    m(".row", [
-                        m(".col-md-1"),
-                        m(".col-md-11", [
-                            m("div",
-                                m("form", [
-                                    locations.todays_locations && locations.todays_locations.map(function(obj, index) {
-                                        // console.log("obj", obj)
-                                        // console.log("index", index)
-                                        return [m("span", [
-                                                m("input.medium[type='radio'][name='location']", {
-                                                    onclick: function() {
-                                                        profile.castVote(obj)
-                                                        console.log("clicked", obj)
-                                                    }
-                                                }),
-                                                m("span.input_radio[name='restaruant']", obj)
-                                            ]),
-                                            (index == 2 || index == 5) ? [m("br")] : ""
-
-                                        ]
-                                    })
-
-                                ])
-                            )
-
-                        ])
-
-                    ]),
-                    m("div", [
-                        m("p.sub_text", "Don’t See a place you like, add here"),
-
-                        m("form[id='newRes']", [
-                            m("input.input_add[type=text][placeholder='Location']", {
-                                oninput: m.withAttr("value", state.setValue),
-                                value: state.value,
+                                ]
                             })
-                        ]),
-                        m("button.btn_main[type='submit'][form='newRes']", {
+                        )
+
+                        // ])
+
+                    ]),
+                    m("p.sub_text", "Don’t See a place you like, add here"),
+                    m(".vertical_break_sm"),
+                    // m(".row ", [
+                    m("form.row[id='newRes']", [
+                        m("input.input_add.col-md-6[type=text][placeholder='Location']", {
+                            oninput: m.withAttr("value", state.setValue),
+                            value: state.value,
+                        }),
+                        m("button.btn_main.col-md-4[type='submit'][form='newRes']", {
                             onclick: function() {
                                 console.log("To add: ", state.value)
                                 locations.addLocation(state.value)
                                 state.value = ""
                             }
                         }, "Add"),
-
-                        m("p.sub_text", "Will only Reset with the Agreement of 2/3rds of the group"),
-                        m("button.btn_second", "Reset chocies"),
-                        m("span.sub_btn_text", "Currently 0/3rds")
+                        // ]),
                     ]),
+                    m(".vertical_break_sm"),
 
-                    m("div.chat_backboard", [
-                        m("h1.chat_title", "Chat:"),
-                        m("div.message_board"),
-                        m("span.user_display", "Malik:"),
-                        m("input.input_message[type=text][placeholder='Type your message here']"),
-                        m("span", m("button.btn_send", "Add")),
+                    m("p.sub_text", "Will only reset with the Agreement of 2/3rds of the group"),
+                    m("button.btn_second", {
+                        onclick: function() {
+                            profile.voteForReset()
+                            locations.resetLocations()
+                        }
+                    }, "Reset chocies"),
+                    m("span.sub_btn_text", "Currently 0/3rds"),
 
-
-                    ]),
 
 
                     //
@@ -4492,16 +4530,24 @@ module.exports = {
                                 ])
                             ])
                         )
-                    )
+                    ),
                 ]),
-                m(".col-md-2")
+                m(".col-md-2"),
+                m("div.chat_backboard.col-md-4", [
+                    m("h1.chat_title", "Chat:"),
+                    m("div.message_board"),
+                    m("span.user_display", "Malik:"),
+                    m("input.input_message.col-md-8[type=text][placeholder='Type your message here']"),
+                    m("button.btn_send.col-md-4", "Add"),
+
+
+                ]),
 
             ])
         ])
     }
 }
-
-},{"../models/Locations":40,"../models/Profile":41,"../models/Users":42,"mithril":38}],44:[function(require,module,exports){
+},{"../models/Locations":40,"../models/Profile":41,"../models/Users":42,"faye":3,"mithril":38}],44:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
