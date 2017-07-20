@@ -1,54 +1,77 @@
-var m = require("mithril")
-var users = require("./Users")
+var m = require("mithril");
+var users = require("./Users");
 
 var Locations = {
     locations_doc_id: "59638a12f36d283e6e74be5b",
+    todays_locations_doc_id: "596d2881734d1d0ff2605936",
     location_list: null,
     todays_locations: [],
 
-    loadList: function() {
+    loadList: function(firstLoad) {
         Locations.todays_locations = []
+        const details1 = { "docId": Locations.locations_doc_id }
+        // console.log("hEre", details1)
         return m.request({
                 method: "GET",
                 url: "http://localhost:8000/Restaurants",
+                data: details1
             })
             .then(function(response) {
                 Locations.location_list = response[0].restaurants
-                const numChoices = Math.floor((Math.random() * 3) + 3)
-                console.log("Num Options", numChoices)
-                const locListLen = Locations.location_list.length
-                var candidate = null
-                var pass = false
-                for (var i = 1; i <= numChoices; i++) {
-                    candidate = Math.floor((Math.random() * locListLen))
-                    for (var j = 0; j <= Locations.todays_locations.length; j++) {
-                        // console.log(Locations.todays_locations[j])
-                        // console.log(Locations.location_list[candidate])
-                        if (Locations.todays_locations[j] == Locations.location_list[candidate]) {
-                            pass = true
-                            console.log("duplicate")
-                            i--
-                        }
+                if (firstLoad) {
+                    console.log("selectTodaysLocations")
+                    Locations.selectTodaysLocations()
+
+                    const details2 = {
+                        "docId": Locations.todays_locations_doc_id,
+                        "restaurants": Locations.todays_locations,
+                        "multi": true
                     }
-                    if (!pass) {
-                        Locations.todays_locations.push(Locations.location_list[candidate])
-                        //console.log("iteration", Locations.todays_locations)
-                    } else {
-                        pass = false
-                    }
+                    console.log("deets", details2)
+                    m.request({
+                        method: "PUT",
+                        url: "http://localhost:8000/Restaurants",
+                        data: details2
+                    })
+                } else {
+                    // console.log("hear")
+                    const details3 = { "docId": Locations.todays_locations_doc_id }
+                    m.request({
+                            method: "GET",
+                            url: "http://localhost:8000/Restaurants",
+                            data: details3
+                        })
+                        .then(function(response) {
+                            Locations.todays_locations = response[0].restaurants
+                            console.log("_-__-", response[0].restaurants)
+                        })
                 }
                 m.redraw()
 
             })
     },
 
-    // selectTodaysLocations: function() {
-    //     const numChoices = Math.floor((Math.random() * 5) + 3)
-    //     const locListLen = Locations.location_list.length()
-    //     for (var i = 1; i <= numChoices; i++) {
-    //         Locations.todays_locations.append(Locations.location_list(Math.floor((Math.random() * locListLen))))
-    //     }
-    // },
+    selectTodaysLocations: function() {
+        console.log("Locations.todays_locations", Locations.todays_locations);
+        var numChoices = Math.floor((Math.random() * 3) + 3);
+        console.log("Num Options", numChoices);
+        var locListLen = Locations.location_list.length;
+        console.log("locListLen", locListLen);
+        var candidate;
+
+        for (var i = 0; i < numChoices; i++) {
+            candidate = Math.floor((Math.random() * locListLen));
+            console.log("iteration", candidate)
+            console.log("candidate", Locations.location_list[candidate])
+            
+            if (Locations.todays_locations.indexOf(Locations.location_list[candidate]) < 0) {
+                Locations.todays_locations.push(Locations.location_list[candidate])
+            } else {
+                i--
+            }
+        }
+        console.log("today loc", Locations.todays_locations)
+    },
 
     addLocation: function(newLocation) {
         const newRes = { "_id": Locations.locations_doc_id, restaurant: newLocation }
@@ -68,7 +91,7 @@ var Locations = {
         }
         console.log("votes: ", users.reset_vote.length)
         if (Math.floor(users.numUsers * (2 / 3)) <= users.reset_vote.length) {
-            Locations.loadList()
+            Locations.loadList(true)
         }
     }
 }

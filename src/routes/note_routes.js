@@ -3,6 +3,7 @@ var ObjectId = require('mongodb').ObjectID;
 
 
 module.exports = function(app, db, fayeClient) {
+
     // GET ROUTES
     app.get('/votes', (req, res) => {
         db.collection('votes').find({}).toArray((err, documents) => {
@@ -34,6 +35,10 @@ module.exports = function(app, db, fayeClient) {
     //     db.collection('tasks').updateOne(details, task, (err, result) => {
 
     app.get('/Restaurants', (req, res) => {
+        // console.log(2, req.query.docId)
+        id = ObjectId(req.query.docId)
+        const details = { '_id': id };
+        // console.log(1, details)
         /**
             -   http://localhost:8000/faye
                 o   message => /test
@@ -42,7 +47,7 @@ module.exports = function(app, db, fayeClient) {
         //     text: 'Hello world'
         // });
 
-        db.collection('Restaurants').find({}).toArray((err, documents) => {
+        db.collection('Restaurants').find(details).toArray((err, documents) => {
             if (err) {
                 res.send({ 'error': 'An error has occurred' });
             } else {
@@ -65,6 +70,17 @@ module.exports = function(app, db, fayeClient) {
         id = ObjectId(req.params.docId);
         const details = { '_id': id };
         db.collection('Users').find(details).toArray((err, documents) => {
+            if (err) {
+                res.send({ 'error': 'An error has occurred' });
+            } else {
+                res.send(documents);
+            }
+        });
+    });
+
+    app.get('/Meta/', (req, res) => {
+        // const details = { '_id': id };
+        db.collection('Meta').find({}).toArray((err, documents) => {
             if (err) {
                 res.send({ 'error': 'An error has occurred' });
             } else {
@@ -103,26 +119,61 @@ module.exports = function(app, db, fayeClient) {
         });
     });
 
-
     app.put('/Restaurants', (req, res) => {
+
+        // console.log("req", req.body)
         // const restaurant = {
         // restaurant: req.body.newRes
         // num_of_votes: req.body.numofvotes,
         // is_active: req.body.isactive
         // };
 
-        console.log("entered add rest API")
-        fayeClient.publish("/addRest", {
-            text: req.body.restaurant
-        });
+        // console.log("entered add rest API")
 
-        id = ObjectId(req.body._id);
+        id = ObjectId(req.body.docId);
         const details = { '_id': id };
-        const task = { $push: { "restaurants": req.body.restaurant } };
+        var task = { $push: { "restaurants": req.body.restaurants } };
+        if (req.body.multi) {
+            task = { $set: { "restaurants": req.body.restaurants } }
+        } else {
+            fayeClient.publish("/addRest", {
+                text: req.body.restaurant
+            });
+        }
+        console.log("task", task)
+        console.log("details", details)
         db.collection('Restaurants').update(details, task, (err, result) => {
             if (err) {
                 res.send({ 'error': 'An error has occurred' });
             } else {
+                res.send();
+            }
+        });
+    });
+
+    app.put('/Meta', (req, res) => {
+        id = ObjectId(req.body.docId);
+        const details = { '_id': id };
+        const task = { $set: { "lastInit": req.body.logInTime } };
+        db.collection('Meta').update(details, task, (err, result) => {
+            if (err) {
+                res.send({ 'error': err });
+            } else {
+                //console.log("results", result);
+                res.send();
+            }
+        });
+    });
+
+    app.put('/Restaurants', (req, res) => {
+        id = ObjectId(req.body._id);
+        const details = { '_id': id };
+        const task = { $set: { "restToAdd": req.body.logInTime } };
+        db.collection('Meta').update(details, task, (err, result) => {
+            if (err) {
+                res.send({ 'error': err });
+            } else {
+                //console.log("results", result);
                 res.send();
             }
         });

@@ -2,6 +2,13 @@ var m = require("mithril")
 
 var faye = require("faye");
 
+var m = require("mithril")
+var profile = require("../models/Profile")
+var locations = require("../models/Locations")
+var users = require("../models/Users")
+
+var client = new faye.Client("http://localhost:8000/faye");
+
 // m.mount("form", [
 //  m("input['type=text', 'name=identifier']"),
 //  m("input['type=submit']", {
@@ -25,12 +32,6 @@ var state = {
         state.value = v;
     }
 }
-var m = require("mithril")
-var profile = require("../models/Profile")
-var locations = require("../models/Locations")
-var users = require("../models/Users")
-
-var client = new faye.Client("http://localhost:8000/faye");
 
 function locationClick(obj) {
     profile.castVote(obj);
@@ -44,18 +45,29 @@ client.subscribe("/test", function(message) {
 });
 
 client.subscribe("/addRest", function(message) {
-    // console.log('Got a new opt for today: ' + message.text);
-    locations.todays_locations.push(message.text)
+    console.log('Got a new opt for today: ' + message.text);
+    // locations.todays_locations.push(message.text)
+    // m.request({
+    //     method: "GET",
+    //     url: url: "http://localhost:8000/Restaurants"
+    // })
+    locations.loadList()
     m.redraw()
+    console.log("getVote from faye", locations.todays_locations)
     users.getVotes()
 });
 
 module.exports = {
     oninit: function() {
-        locations.loadList()
-        //locations.selectTodaysLocations()
+
+        profile.checkLogIn()
+        // setTimeout(function() {
+        // }, 5000)
+        console.log("voteLead", users.voteLead)
         users.getUsers()
         users.getVotes()
+        // locations.loadList(profile.loadNewLocations)
+        // locations.selectTodaysLocations()
     },
 
     onupdate: function() {
@@ -128,7 +140,17 @@ module.exports = {
                         m("button.btn_main.col-md-4[type='submit'][form='newRes']", {
                             onclick: function() {
                                 console.log("To add: ", state.value)
+                                const newRes = { "docId": locations.todays_locations_doc_id, restaurants: state.value }
+                                console.log("newRes tast", newRes)
                                 locations.addLocation(state.value)
+                                m.request({
+                                        method: "PUT",
+                                        url: "http://localhost:8000/Restaurants",
+                                        data: newRes
+                                    })
+                                    .then(function(response) {
+
+                                    })
                                 state.value = ""
                             }
                         }, "Add"),
@@ -143,7 +165,7 @@ module.exports = {
                             locations.resetLocations()
                         }
                     }, "Reset chocies"),
-                    m("span.sub_btn_text", "Currently 0/3rds"),
+                    m("span.sub_btn_text", "Currently " + Math.floor((users.reset_vote.length + 1) / (users.numUsers / 3)) + "/3rds"),
 
 
 
