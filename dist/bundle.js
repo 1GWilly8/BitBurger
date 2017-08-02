@@ -1896,7 +1896,7 @@ extend(Transport.prototype, Timeouts);
 module.exports = Transport;
 
 }).call(this,require('_process'))
-},{"../mixins/logging":5,"../mixins/timeouts":7,"../protocol/channel":8,"../util/array":24,"../util/class":26,"../util/cookies":28,"../util/extend":31,"../util/promise":32,"../util/uri":35,"_process":44}],22:[function(require,module,exports){
+},{"../mixins/logging":5,"../mixins/timeouts":7,"../protocol/channel":8,"../util/array":24,"../util/class":26,"../util/cookies":28,"../util/extend":31,"../util/promise":32,"../util/uri":35,"_process":46}],22:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -4097,13 +4097,19 @@ else window.m = m
 },{}],39:[function(require,module,exports){
 var m = require("mithril")
 var Home = require("./views/home")
+var Landing = require("./views/landing")
 // var faye = require("faye");
 // var client = new faye.Client("http://localhost:8000/faye");
 // client.subscribe("/test", function(message) {
 //     alert('Got a message: ' + message.text);
 // });
 
-// window.onload = function() {
+window.onload = function() {
+	if (!localStorage.user_id) {
+		console.log("redirecting for new user")
+		window.location = "http://localhost:8000/#!/NewUser"
+	}
+}
 // 	var now = new Date().getTime()
 
 m.route(document.body, "/Home", {
@@ -4111,27 +4117,53 @@ m.route(document.body, "/Home", {
         render: function() {
             return m(Home)
         }
+    },
+    "/NewUser": {
+    	render: function() {
+    		return m(Landing)
+    	}
     }
 })
 
 
 
+},{"./views/home":44,"./views/landing":45,"mithril":38}],40:[function(require,module,exports){
+var m = require("mithril");
+var profile = require("./Profile");
 
-//     return m.request({
-//         method: "GET",
-//         url: "http://localhost:8000/tasks"
-//     })
-//     .then(function() {
-//     	if(now - response.getTime() >= 86400000) {
-//     		return m.request({
-//     			method: "POST",
-//     			url: ""
-//     		})
-//     	}
-//     })
-// }
+var Chat = {
 
-},{"./views/home":43,"mithril":38}],40:[function(require,module,exports){
+	messages: [],
+	doc_id: "5979fba1734d1d4610dc06d9",
+
+	loadMessages: function() {
+		m.request({
+			method: "GET",
+			url: "http://localhost:8000/Chat"
+		})
+		.then(function(response) {
+			Chat.messages = response[0].messages
+			console.log("Chat db contents", Chat.messages)
+		}) 
+	},
+
+	sendMessage: function(message) {
+		var timeStamp = new Date().getTime()
+		// console.log("***", profile.user_id)
+		// const data = {"docId": Chat.doc_id, "uId": profile.user_id, "time": timeStamp, "message": message}
+		console.log("***", localStorage.user_id)
+		const data = {"docId": Chat.doc_id, "uId": localStorage.user_id, "time": timeStamp, "message": message}
+		m.request({
+			method: "PUT",
+			url: "http://localhost:8000/Chat",
+			data: data
+		})
+	}
+
+}
+
+module.exports = Chat;
+},{"./Profile":42,"mithril":38}],41:[function(require,module,exports){
 var m = require("mithril");
 var users = require("./Users");
 
@@ -4225,24 +4257,34 @@ var Locations = {
         }
         console.log("votes: ", users.reset_vote.length)
         if (Math.floor(users.numUsers * (2 / 3)) <= users.reset_vote.length) {
+            var data = {"_id": "5978a267f36d2866105775ba", "resetCount": 0, "reset": "true"}
             Locations.loadList(true)
+            m.request({
+                method: "PUT",
+                url: "http://localhost:8000/Meta",
+                data: data
+            })
+            users.reset_vote = []
         }
     }
 }
 module.exports = Locations;
-},{"./Users":42,"mithril":38}],41:[function(require,module,exports){
+},{"./Users":43,"mithril":38}],42:[function(require,module,exports){
 var m = require("mithril")
 var users = require("./Users")
 var locations = require("./Locations")
+var chat = require("./Chat")
 
 var Profile = {
     is_signedIn: false,
     user_name: "",
-    user_id: "59639d01f36d283e6e74cb27",
+    // user_id: "59639d14f36d283e6e74cb30",
     resetVote: false,
 
     oninit: function() {
         console.log("/Users init")
+        // test user id
+        // localStorage.setItem('user_id', "59639d14f36d283e6e74cb30");
         return m.request({
             method: "GET",
             url: "http://localhost:8000/Users",
@@ -4250,7 +4292,10 @@ var Profile = {
     },
 
     castVote: function(place) {
-        var vote = { "_id": Profile.user_id, "place": place }
+        // var vote = { "_id": Profile.user_id, "place": place }
+        var tmp = users.userIds[localStorage.user_id]
+        console.log("123", tmp[0])
+        var vote = { "_id": tmp[0], "place": place }
         return m.request({
                 method: "PUT",
                 url: "http://localhost:8000/Users",
@@ -4265,10 +4310,16 @@ var Profile = {
     },
 
     voteForReset: function() {
-        if (!Profile.resetVote) {
-        }
-            users.reset_vote.push("aye")
-            Profile.resetVote = true
+        if (!Profile.resetVote) {}
+        users.reset_vote.push("aye")
+        Profile.resetVote = true
+        var data = { "_id": "5978a267f36d2866105775ba", "resetCount": users.reset_vote.length, "reset": "true" }
+        m.request({
+            method: "PUT",
+            url: "http://localhost:8000/Meta",
+            data: data
+
+        })
     },
 
     checkLogIn: function() {
@@ -4284,15 +4335,25 @@ var Profile = {
                     console.log("First log in in 24+ hrs. Fetching new vote")
                     locations.loadList(true)
 
-                    var startOfDay = (logInTime - (logInTime%86400000))
+                    var startOfDay = (logInTime - (logInTime % 86400000)) - 35686000
                     console.log("eLogTime", startOfDay)
 
-                    var data = {"docId": "596d0828734d1d0ff260479a", "logInTime": startOfDay}
+                    var data = { "docId": "596d0828734d1d0ff260479a", "logInTime": startOfDay }
+                    var data1 = { "docId": "5979fba1734d1d4610dc06d9", "reset": true }
                     m.request({
                         method: "PUT",
                         url: "http://localhost:8000/Meta",
                         data: data
                     })
+
+                    // m.request({
+                    //     method: "PUT",
+                    //     url: "http://localhost:8000/Chat",
+                    //     data: data1
+                    // })
+                    // .then(function(response) {
+                    //     chat.loadMessages()
+                    // })
                 } else {
                     users.getVotes()
                     locations.loadList(false)
@@ -4308,7 +4369,7 @@ var Profile = {
     // }
 }
 module.exports = Profile;
-},{"./Locations":40,"./Users":42,"mithril":38}],42:[function(require,module,exports){
+},{"./Chat":40,"./Locations":41,"./Users":43,"mithril":38}],43:[function(require,module,exports){
 var m = require("mithril")
 
 var Users = {
@@ -4320,6 +4381,8 @@ var Users = {
     voteLead: "",
     numUsers: 0,
 
+    userIds: {},
+
     getUsers: function() {
         numUsers = 0
         var rmIdValue = true
@@ -4328,13 +4391,15 @@ var Users = {
                 url: "http://localhost:8000/Users/" + Users.users_doc_id
             })
             .then(function(response) {
+                Users.userIds = response[0]
+                console.log("users__:", userIds)
                 for (key in response[0]) {
                     if (!rmIdValue) {
                         Users.numUsers++
-                        // console.log("users++", Users.numUsers)
-                        Users.users_list.push(response[0][key])
+                            // console.log("users++", Users.numUsers)
+                            Users.users_list.push(response[0][key])
                     } else {
-                    	rmIdValue = false
+                        rmIdValue = false
                     }
                 }
             })
@@ -4348,16 +4413,16 @@ var Users = {
         var counter = 1
         for (var i = 0; i < Users.users_list.length; i++) {
             m.request({
-                method: "GET",
-                url: "http://localhost:8000/Users/" + Users.users_list[i]
-            })
-            .then(function(response) {
-                counter++
-                Users.vote_tally.push(response[0].vote)
-                if (counter == Users.users_list.length) {
-                    Users.countVotes()
-                }
-            })
+                    method: "GET",
+                    url: "http://localhost:8000/Users/" + Users.users_list[i]
+                })
+                .then(function(response) {
+                    counter++
+                    Users.vote_tally.push(response[0].vote)
+                    if (counter == Users.users_list.length) {
+                        Users.countVotes()
+                    }
+                })
         }
     },
 
@@ -4378,7 +4443,7 @@ var Users = {
                 }
                 if (curTally > maxVotes) {
                     curLead = Users.vote_tally[i],
-                    maxVotes = curTally
+                        maxVotes = curTally
                 }
             }
         }
@@ -4399,16 +4464,14 @@ var Users = {
 }
 
 module.exports = Users;
-
-},{"mithril":38}],43:[function(require,module,exports){
+},{"mithril":38}],44:[function(require,module,exports){
 var m = require("mithril")
 
 var faye = require("faye");
-
-var m = require("mithril")
 var profile = require("../models/Profile")
 var locations = require("../models/Locations")
 var users = require("../models/Users")
+var chat = require("../models/Chat")
 
 var client = new faye.Client("http://localhost:8000/faye");
 
@@ -4431,9 +4494,15 @@ var client = new faye.Client("http://localhost:8000/faye");
 // src/views/Layout.js
 var state = {
     value: "",
+    chatMessage: "",
     setValue: function(v) {
         state.value = v;
-    }
+    },
+    setChatMessageValue: function(v) {
+        state.chatMessage = v;
+    },
+    curResetVote: 0,
+    curVoteLead: users.voteLead
 }
 
 function locationClick(obj) {
@@ -4443,32 +4512,37 @@ function locationClick(obj) {
 };
 
 client.subscribe("/test", function(message) {
-    // console.log('Got a message: ' + message.text);
     users.getVotes()
 });
 
 client.subscribe("/addRest", function(message) {
     console.log('Got a new opt for today: ' + message.text);
-    // locations.todays_locations.push(message.text)
-    // m.request({
-    //     method: "GET",
-    //     url: url: "http://localhost:8000/Restaurants"
-    // })
     locations.loadList()
     m.redraw()
     console.log("getVote from faye", locations.todays_locations)
     users.getVotes()
 });
 
+client.subscribe("/chat", function(message) {
+    console.log("Ishould be getting msg, but I'm not")
+    chat.loadMessages()
+    m.redraw()
+});
+
 module.exports = {
     oninit: function() {
-
+        // if (!localStorage.user_id) {
+        //     window.location = "http://localhost:8000/#!/NewUser"
+        // }
+        users.countVotes()
         profile.checkLogIn()
         // setTimeout(function() {
         // }, 5000)
-        console.log("voteLead", users.voteLead)
+        console.log("voteLead", state.voteLead)
         users.getUsers()
         users.getVotes()
+        chat.loadMessages()
+        // chat.sendMessage("test")
         // locations.loadList(profile.loadNewLocations)
         // locations.selectTodaysLocations()
     },
@@ -4566,13 +4640,21 @@ module.exports = {
                         onclick: function() {
                             profile.voteForReset()
                             locations.resetLocations()
+                            state.curResetVote
+                            m.request({
+                                    method: "GET",
+                                    url: "http://localhost:8000/Meta"
+                                })
+                                .then(function(response) {
+                                    console.log("this doc", response[1].resetVoteCount)
+                                    state.curResetVote = response[1].resetVoteCount
+                                    m.redraw()
+                                })
                         }
                     }, "Reset chocies"),
-                    m("span.sub_btn_text", "Currently " + Math.floor((users.reset_vote.length + 1) / (users.numUsers / 3)) + "/3rds"),
+                    m("span.sub_btn_text", "Currently " + Math.floor((state.curResetVote + 1) / (users.numUsers / 3)) + "/3rds"),
 
 
-
-                    //
                     m(".modal.fade[aria-labelledby='myModalLabel'][id='sign_in_modal'][role='dialog'][tabindex='-1']",
                         m(".modal-dialog.summary-dialog[role='document']",
                             m(".modal-content", [
@@ -4609,19 +4691,144 @@ module.exports = {
                 m(".col-md-2"),
                 m("div.chat_backboard.col-md-4", [
                     m("h1.chat_title", "Chat:"),
-                    m("div.message_board"),
+                    m("div.message_board[id='messageBoard']", [
+                        // oninit: function() {
+                        // var element = document.getElementById("messageBoard");
+                        // var elementHeight = element.scrollHeight;
+                        // element.scrollTop = elementHeight
+                        // },
+                        chat.messages && chat.messages.map(function(obj, index) {
+                            // var actualName = users.userIds.find(function(obj[0]) {
+                            //     return 
+                            // })
+                            // console.log("HERE!!", users.userIds[obj[0]])
+                            // if (obj[0] == profile.user_id) {
+                            if (obj[0] == localStorage.user_id) {
+                                return m("div.my_message", [
+                                    m("span.message_name_display", obj[0]),
+                                    m(".vertical_break_min"),
+                                    m("div.my_message_text_display", obj[2])
+                                ])
+                            } else {
+                                return m("div.message", [
+                                    m("span.message_name_display", obj[0]),
+                                    m(".vertical_break_min"),
+                                    m("div.message_text_display", obj[2])
+                                ])
+                            }
+
+                        })
+                        // ,
+                        // oninit: function() {
+                        //     var objDiv = document.getElementById("div.message_board");
+                        //     objDiv.scrollTop = objDiv.scrollHeight;
+                        //     this.scrollTop = this.scrollHeight
+                        // }
+                    ]),
                     m("span.user_display", "Malik:"),
-                    m("input.input_message.col-md-8[type=text][placeholder='Type your message here']"),
-                    m("button.btn_send.col-md-4", "Add"),
-
-
+                    m("input.input_message.col-md-8[type=text][placeholder='Type your message here']", {
+                        oninput: m.withAttr("value", state.setChatMessageValue),
+                        value: state.chatMessage,
+                        onkeyup: function(event) {
+                            if (event.keyCode == 13 && event.target.value != "") {
+                                chat.sendMessage(state.chatMessage),
+                                    state.setChatMessageValue("")
+                            }
+                        }
+                    }),
+                    m("button.btn_send.col-md-4", {
+                        onclick: function() {
+                            chat.sendMessage(state.chatMessage)
+                        }
+                    }, "Add")
+                    // m("div.chat_gradient")
                 ]),
 
             ])
         ])
     }
 }
-},{"../models/Locations":40,"../models/Profile":41,"../models/Users":42,"faye":3,"mithril":38}],44:[function(require,module,exports){
+},{"../models/Chat":40,"../models/Locations":41,"../models/Profile":42,"../models/Users":43,"faye":3,"mithril":38}],45:[function(require,module,exports){
+var m = require("mithril")
+var profile = require("../models/Profile")
+var locations = require("../models/Locations")
+var users = require("../models/Users")
+var chat = require("../models/Chat")
+
+var state = {
+    value: "",
+    setValue: function(v) {
+        state.value = v;
+    }
+}
+
+module.exports = {
+    view: function(vnode) {
+        return m("body.login_screen_background", [
+            m("div.container", [
+                m(".vertical_break_hg"),
+                m(".vertical_break_lg"),
+                m(".vertical_break_md"),
+                m("div.col-8-md.login_text_display", "Enter your name to start eating!"),
+                m("div.col-12-md", [
+                    m(".input-group", [
+                        m("input.form-control[placeholder='Prefered name'][type='text']", {
+                            oninput: m.withAttr("value", state.setValue),
+                            value: state.value,
+                            onkeyup: function(event) {
+                                if (event.keyCode == 13 && event.target.value != "") {
+                                    m.request({
+                                            method: "POST",
+                                            url: "http://localhost:8000/Users",
+
+                                        })
+                                        .then(function(response) {
+
+                                            localStorage.setItem('user_id', state.value);
+                                            var data = { "name": state.value, "uId": response, "mapping": true }
+                                            console.log(":::", data)
+                                            m.request({
+                                                method: "PUT",
+                                                url: "http://localhost:8000/Users",
+                                                data: data
+                                            })
+
+                                        })
+                                        window.location = "http://localhost:8000/#!/Home"
+                                }
+                            }
+                        }),
+                        m("span.input-group-addon.cursor_pointer", {
+                                onclick: function() {
+                                    m.request({
+                                            method: "POST",
+                                            url: "http://localhost:8000/Users",
+
+                                        })
+                                        .then(function(response) {
+
+                                            localStorage.setItem('user_id', state.value);
+                                            var data = { "name": state.value, "uId": response, "mapping": true }
+                                            console.log(":::", data)
+                                            m.request({
+                                                method: "PUT",
+                                                url: "http://localhost:8000/Users",
+                                                data: data
+                                            })
+
+                                        })
+                                        window.location = "http://localhost:8000/#!/Home"
+                                }
+                            },
+                            "Eat!"
+                        )
+                    ])
+                ])
+            ])
+        ])
+    }
+}
+},{"../models/Chat":40,"../models/Locations":41,"../models/Profile":42,"../models/Users":43,"mithril":38}],46:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 

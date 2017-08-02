@@ -1,10 +1,35 @@
 @import "compass/css3";
 .chat_backboard {
-    background-color: #424242;
+    /*background-color: #424242;*/
     width: auto;
     height: 415px;
     margin-bottom: 64px;
-    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 50);
+    /*box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 50);*/
+}
+
+.chat_gradient {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    right: 0;
+    top: 0;
+    background: red;
+    /* For browsers that do not support gradients */
+    background: -webkit-linear-gradient(red, yellow);
+    /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(red, yellow);
+    /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(red, yellow);
+    /* For Firefox 3.6 to 15 */
+    background: linear-gradient(red, yellow);
+    /* Standard syntax */
+    /*    background: -moz-linear-gradient(bottom,  rgba(255,255,255,0) 0%, rgba(255,255,255,1) 20%);
+    background: -webkit-gradient(linear, left bottom, left bottom, color-stop(0%,rgba(255,255,255,0)), color-stop(20%,rgba(255,255,255,1)));
+    background: -webkit-linear-gradient(bottom,  rgba(255,255,255,0) 0%,rgba(255,255,255,1) 20%);
+    background: -o-linear-gradient(bottom,  rgba(255,255,255,0) 0%,rgba(255,255,255,1) 20%);
+    background: -ms-linear-gradient(bottom,  rgba(255,255,255,0) 0%,rgba(255,255,255,1) 20%);
+    background: linear-gradient(to bottom,  rgba(255,255,255,0) 0%,rgba(255,255,255,1) 20%);
+*/
 }
 
 .user_display {
@@ -16,11 +41,32 @@
 }
 
 .message_board {
-    background-color: #fff;
+    /*background-color: #fff;*/
     width: auto;
     height: 302px;
-    box-shadow: inset 0px 3px 3px 0px rgba(0, 0, 0, 1);
+    /*box-shadow: inset 0px 3px 3px 0px rgba(0, 0, 0, 1);*/
+    position: relative;
     overflow: scroll;
+}
+
+.message {
+    width: auto;
+    height: 40px;
+    position: relative;
+    padding-left: 15px;
+}
+
+.my_message {
+    width: auto;
+    height: 40px;
+    position: relative;
+    text-align: right;
+    padding-right: 18px;
+}
+
+.sender_name_bold {
+    font-size: 110%;
+    font-weight: 700;
 }
 
 .nav_bar_main {
@@ -149,6 +195,25 @@
     padding-top: 24px;
 }
 
+.cursor_pointer {
+    cursor: pointer;
+}
+
+.login_screen_background {
+    background: #4286f4;
+    height: 100vh;
+}
+
+.login_text_display {
+    font-size: 36pt;
+    text-align: center;
+    font-weight: 700;
+}
+
+.login_username_input {
+    width: 100%;
+}
+
 .info_text {
     font-size: 14px;
     color: #9B9B9B;
@@ -175,6 +240,12 @@
     font-weight: medium;
 }
 
+.vertical_break_min {
+    margin-right: -15px;
+    margin-left: -15px;
+    height: -5px;
+}
+
 .vertical_break_sm {
     margin-right: -15px;
     margin-left: -15px;
@@ -193,69 +264,131 @@
     height: 48px;
 }
 
+.vertical_break_hg {
+    margin-right: -15px;
+    margin-left: -15px;
+    height: 128px;
+}
+
+.message_name_display {
+    font-size: 110%;
+    font-weight: 700;
+    padding-bottom: 1px;
+    margin-bottom: 0px;
+}
+
+.message_text_display {
+    padding-top: 1px;
+    margin-top: 0px;
+    margin-right: -8px;
+}
+
+.my_message_text_display {
+    padding-top: 1px;
+    margin-top: 0px;
+    margin-left: -8px;
+}
+
 .radio_btn_spl {
     height: 30px;
     width: 30px;
     background: url('./img/BitBurger_radio_btn_unchecked.png');
 }
 
-body{color:#444;font:100%/1.4 sans-serif;}
+.chat_gradient {
+    z-index: 2;
+    background: -moz-linear-gradient(top, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 70%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, rgba(255, 255, 255, 0)), color-stop(70%, rgba(255, 255, 255, 1)));
+    background: -webkit-linear-gradient(top, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 70%);
+    background: -o-linear-gradient(top, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 70%);
+    background: -ms-linear-gradient(top, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 70%);
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 70%);
+}
+
+​ body {
+    color: #444;
+    font: 100%/1.4 sans-serif;
+}
+
+
 
 
 /* CUSTOM RADIO & CHECKBOXES
    http://stackoverflow.com/a/17541916/383904 */
+
 .rad,
-.ckb{
-  cursor: pointer;
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
+.ckb {
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
 }
-.rad > input,
-.ckb > input{ /* HIDE ORG RADIO & CHECKBOX */
-  visibility: hidden;
-  position: absolute;
+
+.rad>input,
+.ckb>input {
+    /* HIDE ORG RADIO & CHECKBOX */
+    visibility: hidden;
+    position: absolute;
 }
+
+
+
 /* RADIO & CHECKBOX STYLES */
-.rad > i,
-.ckb > i{     /* DEFAULT <i> STYLE */
-  display: inline-block;
-  vertical-align: middle;
-  width:  16px;
-  height: 16px;
-  border-radius: 50%;
-  transition: 0.2s;
-  box-shadow: inset 0 0 0 8px #fff;
-  border: 1px solid gray;
-  background: gray;
+
+.rad>i,
+.ckb>i {
+    /* DEFAULT <i> STYLE */
+    display: inline-block;
+    vertical-align: middle;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    transition: 0.2s;
+    box-shadow: inset 0 0 0 8px #fff;
+    border: 1px solid gray;
+    background: gray;
 }
+
+
+
 /* CHECKBOX OVERWRITE STYLES */
-.ckb > i {
-  width: 25px;
-  border-radius: 3px;
+
+.ckb>i {
+    width: 25px;
+    border-radius: 3px;
 }
-.rad:hover > i{ /* HOVER <i> STYLE */
-  box-shadow: inset 0 0 0 3px #fff;
-  background: gray;
+
+.rad:hover>i {
+    /* HOVER <i> STYLE */
+    box-shadow: inset 0 0 0 3px #fff;
+    background: gray;
 }
-.rad > input:checked + i{ /* (RADIO CHECKED) <i> STYLE */
-  box-shadow: inset 0 0 0 3px #fff;
-  background: orange;
+
+.rad>input:checked+i {
+    /* (RADIO CHECKED) <i> STYLE */
+    box-shadow: inset 0 0 0 3px #fff;
+    background: orange;
 }
+
+
+
 /* CHECKBOX */
-.ckb > input + i:after{
-  content: "";
-  display: block;
-  height: 12px;
-  width:  12px;
-  margin: 2px;
-  border-radius: inherit;
-  transition: inherit;
-  background: gray;
+
+.ckb>input+i:after {
+    content: "";
+    display: block;
+    height: 12px;
+    width: 12px;
+    margin: 2px;
+    border-radius: inherit;
+    transition: inherit;
+    background: gray;
 }
-.ckb > input:checked + i:after{ /* (RADIO CHECKED) <i> STYLE */
-  margin-left: 11px;
-  background:  orange;
+
+.ckb>input:checked+i:after {
+    /* (RADIO CHECKED) <i> STYLE */
+    margin-left: 11px;
+    background: orange;
 }
 
 

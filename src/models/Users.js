@@ -9,6 +9,8 @@ var Users = {
     voteLead: "",
     numUsers: 0,
 
+    userIds: {},
+
     getUsers: function() {
         numUsers = 0
         var rmIdValue = true
@@ -17,13 +19,15 @@ var Users = {
                 url: "http://localhost:8000/Users/" + Users.users_doc_id
             })
             .then(function(response) {
+                Users.userIds = response[0]
+                console.log("users__:", userIds)
                 for (key in response[0]) {
                     if (!rmIdValue) {
                         Users.numUsers++
-                        // console.log("users++", Users.numUsers)
-                        Users.users_list.push(response[0][key])
+                            // console.log("users++", Users.numUsers)
+                            Users.users_list.push(response[0][key])
                     } else {
-                    	rmIdValue = false
+                        rmIdValue = false
                     }
                 }
             })
@@ -37,16 +41,16 @@ var Users = {
         var counter = 1
         for (var i = 0; i < Users.users_list.length; i++) {
             m.request({
-                method: "GET",
-                url: "http://localhost:8000/Users/" + Users.users_list[i]
-            })
-            .then(function(response) {
-                counter++
-                Users.vote_tally.push(response[0].vote)
-                if (counter == Users.users_list.length) {
-                    Users.countVotes()
-                }
-            })
+                    method: "GET",
+                    url: "http://localhost:8000/Users/" + Users.users_list[i]
+                })
+                .then(function(response) {
+                    counter++
+                    Users.vote_tally.push(response[0].vote)
+                    if (counter == Users.users_list.length) {
+                        Users.countVotes()
+                    }
+                })
         }
     },
 
@@ -67,7 +71,7 @@ var Users = {
                 }
                 if (curTally > maxVotes) {
                     curLead = Users.vote_tally[i],
-                    maxVotes = curTally
+                        maxVotes = curTally
                 }
             }
         }

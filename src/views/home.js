@@ -1,11 +1,10 @@
 var m = require("mithril")
 
 var faye = require("faye");
-
-var m = require("mithril")
 var profile = require("../models/Profile")
 var locations = require("../models/Locations")
 var users = require("../models/Users")
+var chat = require("../models/Chat")
 
 var client = new faye.Client("http://localhost:8000/faye");
 
@@ -28,9 +27,15 @@ var client = new faye.Client("http://localhost:8000/faye");
 // src/views/Layout.js
 var state = {
     value: "",
+    chatMessage: "",
     setValue: function(v) {
         state.value = v;
-    }
+    },
+    setChatMessageValue: function(v) {
+        state.chatMessage = v;
+    },
+    curResetVote: 0,
+    curVoteLead: users.voteLead
 }
 
 function locationClick(obj) {
@@ -40,32 +45,37 @@ function locationClick(obj) {
 };
 
 client.subscribe("/test", function(message) {
-    // console.log('Got a message: ' + message.text);
     users.getVotes()
 });
 
 client.subscribe("/addRest", function(message) {
     console.log('Got a new opt for today: ' + message.text);
-    // locations.todays_locations.push(message.text)
-    // m.request({
-    //     method: "GET",
-    //     url: url: "http://localhost:8000/Restaurants"
-    // })
     locations.loadList()
     m.redraw()
     console.log("getVote from faye", locations.todays_locations)
     users.getVotes()
 });
 
+client.subscribe("/chat", function(message) {
+    console.log("Ishould be getting msg, but I'm not")
+    chat.loadMessages()
+    m.redraw()
+});
+
 module.exports = {
     oninit: function() {
-
+        // if (!localStorage.user_id) {
+        //     window.location = "http://localhost:8000/#!/NewUser"
+        // }
+        users.countVotes()
         profile.checkLogIn()
         // setTimeout(function() {
         // }, 5000)
-        console.log("voteLead", users.voteLead)
+        console.log("voteLead", state.voteLead)
         users.getUsers()
         users.getVotes()
+        chat.loadMessages()
+        // chat.sendMessage("test")
         // locations.loadList(profile.loadNewLocations)
         // locations.selectTodaysLocations()
     },
@@ -163,13 +173,21 @@ module.exports = {
                         onclick: function() {
                             profile.voteForReset()
                             locations.resetLocations()
+                            state.curResetVote
+                            m.request({
+                                    method: "GET",
+                                    url: "http://localhost:8000/Meta"
+                                })
+                                .then(function(response) {
+                                    console.log("this doc", response[1].resetVoteCount)
+                                    state.curResetVote = response[1].resetVoteCount
+                                    m.redraw()
+                                })
                         }
                     }, "Reset chocies"),
-                    m("span.sub_btn_text", "Currently " + Math.floor((users.reset_vote.length + 1) / (users.numUsers / 3)) + "/3rds"),
+                    m("span.sub_btn_text", "Currently " + Math.floor((state.curResetVote + 1) / (users.numUsers / 3)) + "/3rds"),
 
 
-
-                    //
                     m(".modal.fade[aria-labelledby='myModalLabel'][id='sign_in_modal'][role='dialog'][tabindex='-1']",
                         m(".modal-dialog.summary-dialog[role='document']",
                             m(".modal-content", [
@@ -206,12 +224,57 @@ module.exports = {
                 m(".col-md-2"),
                 m("div.chat_backboard.col-md-4", [
                     m("h1.chat_title", "Chat:"),
-                    m("div.message_board"),
+                    m("div.message_board[id='messageBoard']", [
+                        // oninit: function() {
+                        // var element = document.getElementById("messageBoard");
+                        // var elementHeight = element.scrollHeight;
+                        // element.scrollTop = elementHeight
+                        // },
+                        chat.messages && chat.messages.map(function(obj, index) {
+                            // var actualName = users.userIds.find(function(obj[0]) {
+                            //     return 
+                            // })
+                            // console.log("HERE!!", users.userIds[obj[0]])
+                            // if (obj[0] == profile.user_id) {
+                            if (obj[0] == localStorage.user_id) {
+                                return m("div.my_message", [
+                                    m("span.message_name_display", obj[0]),
+                                    m(".vertical_break_min"),
+                                    m("div.my_message_text_display", obj[2])
+                                ])
+                            } else {
+                                return m("div.message", [
+                                    m("span.message_name_display", obj[0]),
+                                    m(".vertical_break_min"),
+                                    m("div.message_text_display", obj[2])
+                                ])
+                            }
+
+                        })
+                        // ,
+                        // oninit: function() {
+                        //     var objDiv = document.getElementById("div.message_board");
+                        //     objDiv.scrollTop = objDiv.scrollHeight;
+                        //     this.scrollTop = this.scrollHeight
+                        // }
+                    ]),
                     m("span.user_display", "Malik:"),
-                    m("input.input_message.col-md-8[type=text][placeholder='Type your message here']"),
-                    m("button.btn_send.col-md-4", "Add"),
-
-
+                    m("input.input_message.col-md-8[type=text][placeholder='Type your message here']", {
+                        oninput: m.withAttr("value", state.setChatMessageValue),
+                        value: state.chatMessage,
+                        onkeyup: function(event) {
+                            if (event.keyCode == 13 && event.target.value != "") {
+                                chat.sendMessage(state.chatMessage),
+                                    state.setChatMessageValue("")
+                            }
+                        }
+                    }),
+                    m("button.btn_send.col-md-4", {
+                        onclick: function() {
+                            chat.sendMessage(state.chatMessage)
+                        }
+                    }, "Add")
+                    // m("div.chat_gradient")
                 ]),
 
             ])

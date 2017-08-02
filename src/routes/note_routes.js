@@ -15,38 +15,9 @@ module.exports = function(app, db, fayeClient) {
         });
     });
 
-
-    // app.delete('/tasks/:id', (req, res) => {
-    //     const id = req.params.id;
-    //     const details = { '_id': new ObjectID(id) };
-    //     db.collection('tasks').remove(details, (err, item) => {
-    //         if (err) {
-    //             res.send({ 'error': 'An error has occurred' });
-    //         } else {
-    //             res.send("task " + id + " delete!");
-    //         }
-    //     });
-    // });
-
-    // app.put('/Daily_votes/:vote', (req, res) => {
-    //     const vote = req.params.vote;
-    //     const details = { '_id': $natural:-1 };
-    //     const task = {$set: {"uId": vote}};
-    //     db.collection('tasks').updateOne(details, task, (err, result) => {
-
     app.get('/Restaurants', (req, res) => {
-        // console.log(2, req.query.docId)
         id = ObjectId(req.query.docId)
         const details = { '_id': id };
-        // console.log(1, details)
-        /**
-            -   http://localhost:8000/faye
-                o   message => /test
-        */
-        // fayeClient.publish("/test", {
-        //     text: 'Hello world'
-        // });
-
         db.collection('Restaurants').find(details).toArray((err, documents) => {
             if (err) {
                 res.send({ 'error': 'An error has occurred' });
@@ -99,37 +70,58 @@ module.exports = function(app, db, fayeClient) {
         });
     });
 
-    // PUT ROUTES
-    app.put('/Users', (req, res) => {
-        id = ObjectId(req.body._id);
-        const details = { '_id': id };
-        const task = { $set: { "vote": req.body.place } };
-
-        fayeClient.publish("/test", {
-            text: req.body.place
-        });
-
-        db.collection('Users').update(details, task, (err, result) => {
+    app.get('/Chat', (req, res) => {
+        db.collection('Chat').find().toArray((err, documents) => {
             if (err) {
-                res.send({ 'error': err });
+                res.send({ 'error': 'An error has occurred' });
             } else {
-                //console.log("results", result);
-                res.send();
+                res.send(documents);
             }
         });
     });
 
+    // PUT ROUTES
+    app.put('/Users', (req, res) => {
+
+        if (req.body.mapping) {
+
+            id = ObjectId("595e65fd734d1d25634234d3");
+            var details = { '_id': id };
+            var name = req.body.name;
+            var nameIdPair = {}
+            nameIdPair[name] = req.body.uId
+            console.log("!!!", req.body.uId)
+            var task = { $push: nameIdPair };
+            console.log("??", task)
+            db.collection('Users').update(details, task, (err, result) => {
+                if (err) {
+                    res.send({ 'error': err });
+                } else {
+                    res.send();
+                }
+            });
+
+        } else {
+
+            id = ObjectId(req.body._id);
+            var details = { '_id': id };
+            var task = { $set: { "vote": req.body.place } };
+            fayeClient.publish("/test", {
+                text: req.body.place
+            });
+
+            db.collection('Users').update(details, task, (err, result) => {
+                if (err) {
+                    res.send({ 'error': err });
+                } else {
+                    //console.log("results", result);
+                    res.send();
+                }
+            });
+        }
+    });
+
     app.put('/Restaurants', (req, res) => {
-
-        // console.log("req", req.body)
-        // const restaurant = {
-        // restaurant: req.body.newRes
-        // num_of_votes: req.body.numofvotes,
-        // is_active: req.body.isactive
-        // };
-
-        // console.log("entered add rest API")
-
         id = ObjectId(req.body.docId);
         const details = { '_id': id };
         var task = { $push: { "restaurants": req.body.restaurants } };
@@ -140,8 +132,6 @@ module.exports = function(app, db, fayeClient) {
                 text: req.body.restaurant
             });
         }
-        console.log("task", task)
-        console.log("details", details)
         db.collection('Restaurants').update(details, task, (err, result) => {
             if (err) {
                 res.send({ 'error': 'An error has occurred' });
@@ -152,14 +142,20 @@ module.exports = function(app, db, fayeClient) {
     });
 
     app.put('/Meta', (req, res) => {
-        id = ObjectId(req.body.docId);
+        id = ObjectId(req.body._id);
         const details = { '_id': id };
-        const task = { $set: { "lastInit": req.body.logInTime } };
+        console.log("ah", details)
+        var task = ""
+        if (req.body.reset) {
+            console.log("here1")
+            task = { $set: { "resetVoteCount": req.body.resetCount } };
+        } else {
+            task = { $set: { "lastInit": req.body.logInTime } };
+        }
         db.collection('Meta').update(details, task, (err, result) => {
             if (err) {
                 res.send({ 'error': err });
             } else {
-                //console.log("results", result);
                 res.send();
             }
         });
@@ -173,11 +169,40 @@ module.exports = function(app, db, fayeClient) {
             if (err) {
                 res.send({ 'error': err });
             } else {
-                //console.log("results", result);
                 res.send();
             }
         });
     });
+
+    app.put('/Chat', (req, res) => {
+        id = ObjectId(req.body.docId)
+        const details = { '_id': id }
+        if (!req.body.reset) {
+            const task = { $push: { "messages": [req.body.uId, req.body.time, req.body.message] } };
+            console.log("~~~", req.body.uId)
+            db.collection('Chat').update(details, task, (err, result) => {
+                if (err) {
+                    res.send({ 'error': err });
+                } else {
+                    res.send();
+                }
+            });
+            fayeClient.publish("/chat", {
+                text: req.body.place
+            });
+        } else {
+            console.log("resetting chat", details)
+            const task = { $set: { "messages": [] } }
+            db.collection('Chat').update(details, task, (err, result) => {
+                if (err) {
+                    res.send({ 'error': err });
+                } else {
+                    res.send();
+                }
+            })
+        }
+    });
+
 
     // POST ROUTES
     app.post('/messages', (req, res) => {
@@ -194,59 +219,24 @@ module.exports = function(app, db, fayeClient) {
             }
         });
     });
+
+    app.post('/Users', (req, res) => {
+        id = ObjectId()
+        const newUser = {
+            "_id": id,
+            "vote": ""
+        };
+        console.log("new user slot", newUser)
+        db.collection('Users').insert(newUser, (err, result) => {
+            if (err) {
+                res.send({ 'error': 'An error has occurred' });
+            } else {
+                res.send(id);
+            }
+        });
+    });
 };
 
-// app.get('/tasks/:id', (req, res) => {
-//     const id = req.params.id;
-//     const details = { '_id': new ObjectID(id) };
-//     db.collection('tasks').findOne(details, (err, item) => {
-//         if (err) {
-//             res.send({ 'error': 'An error has occurred' });
-//         } else {
-//             res.send(item);
-//         }
-//     });
-// });
-
-// app.delete('/tasks/:id', (req, res) => {
-//     const id = req.params.id;
-//     const details = { '_id': new ObjectID(id) };
-//     db.collection('tasks').remove(details, (err, item) => {
-//         if (err) {
-//             res.send({ 'error': 'An error has occurred' });
-//         } else {
-//             res.send("task " + id + " delete!");
-//         }
-//     });
-// });
-
-// app.put('/Daily_votes/:id', (req, res) => {
-//     const id = req.params.id;
-//     const details = { '_id': new ObjectID(id) };
-//     const vote = { $set: {} };
-//     for (key in req.body) {
-//         vote['$set'][key] = req.body[key]
-//     }
-//     db.collection('Daily_votes').update(details, vote, (err, result) => {
-//         if (err) {
-//             res.send({ 'error': 'An error has occurred' });
-//         } else {
-//             res.send(vote);
-//         }
-//     });
-// });
-
-// app.post('/daily_votes', (req, res) => {
-//     const ballotSheet = { user: req.body.user };
-//     console.log(ballotSheet);
-//     db.collection('daily_votes').insert(ballotSheet, (err, result) => {
-//         if (err) {
-//             res.send({ 'error': 'An error has occurred' });
-//         } else {
-//             res.send(result.ops[0]);
-//         }
-//     });
-// });
 
 //Users[name, remaining votes]
 //Daily_votes[User1's vote, U2's vote, U3 vote, U4v, U5v] "0 by default"

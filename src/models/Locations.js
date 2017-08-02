@@ -91,7 +91,14 @@ var Locations = {
         }
         console.log("votes: ", users.reset_vote.length)
         if (Math.floor(users.numUsers * (2 / 3)) <= users.reset_vote.length) {
+            var data = {"_id": "5978a267f36d2866105775ba", "resetCount": 0, "reset": "true"}
             Locations.loadList(true)
+            m.request({
+                method: "PUT",
+                url: "http://localhost:8000/Meta",
+                data: data
+            })
+            users.reset_vote = []
         }
     }
 }
