@@ -1,6 +1,5 @@
 var m = require("mithril")
 var Home = require("./views/home")
-var NewHome = require("./views/newHome")
 var Landing = require("./views/landing")
 var profile = require("./models/Profile")
 var chat = require("./models/Chat")

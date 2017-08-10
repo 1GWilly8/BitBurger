@@ -121,7 +121,6 @@ module.exports = function(app, db, fayeClient) {
                 });
             }, 600)
         } else {
-
             id = ObjectId(req.body._id);
             var details = { '_id': id };
             var task = { $set: { "vote": req.body.place } };
@@ -129,8 +128,8 @@ module.exports = function(app, db, fayeClient) {
             //     text: req.body.place
             // });
             
-            fayeClient.publish("/voteChange", {
-                text: place
+            fayeClient.publish("/test", {
+                text: req.body.place
             });
 
             db.collection('Users').update(details, task, (err, result) => {
@@ -241,6 +240,13 @@ module.exports = function(app, db, fayeClient) {
                 res.send(result.ops[0]);
             }
         });
+    });
+
+    app.post('/redraw', (req, res) => {
+        
+        fayeClient.publish("/redraw", {
+                text: "ok"
+            });
     });
 
     app.post('/Users', (req, res) => {

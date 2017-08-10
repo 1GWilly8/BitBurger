@@ -66,6 +66,10 @@ client.subscribe("/chat", function(message) {
     m.redraw()
 });
 
+client.subscribe("/redraw", function(message) {
+    m.redraw()
+});
+
 // client.subscribe("/voteChange", function(message) {
 //     console.log("new vote", message.text)
 //     users.countVotes()
@@ -252,6 +256,9 @@ module.exports = {
                         m("button.btn_send.", {
                             onclick: function() {
                                 chat.sendMessage(state.chatMessage)
+                                console.log("users.names_list", users.users_names_list)
+                                console.log("users.vote_tally", users.vote_tally)
+                                console.log("users.vote_count", users.vote_count)
                             }
                         }, "Send")
                     ])

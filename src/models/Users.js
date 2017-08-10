@@ -27,7 +27,7 @@ var Users = {
                         Users.numUsers++
                             // console.log("users++", Users.users_names_list)
                             Users.users_names_list.push(key)
-                            Users.users_list.push(response[0][key])
+                        Users.users_list.push(response[0][key])
                     } else {
                         rmIdValue = false
                     }
@@ -59,26 +59,44 @@ var Users = {
     countVotes: function() {
         // console.log("####### count initiated #######")
         // console.log("U.vote_tally", Users.vote_tally)
+        var tmpVoteTally = Users.vote_tally
         var maxVotes = 0
         var curLead = ""
+
+        // Users.vote_tally.forEach(function(itm) {
+        //     if (!itm.__proto__.__proto__) {
+        //         cnt++;
+        //     }
+        // });
+
+            console.log("vote_tally len", Users.vote_tally.length)
         for (var i = 0; i < Users.vote_tally.length; i++) {
+            console.log("entering 1st for loop")
             if (Users.vote_tally[i] != "") {
+                console.log("count non-null space in vote_tally")
                 var curTally = 1
                 for (var j = i + 1; j < Users.vote_tally.length; j++) {
+                    console.log("entering 2nd for loop")
                     if (Users.vote_tally[i] == Users.vote_tally[j]) {
-                        // console.log("count: ", Users.vote_tally[i], curTally + 1)
+                        console.log("vote_tally len", Users.vote_tally)
+                        console.log("instance of match", Users.vote_tally[i])
                         Users.vote_tally[j] = ""
                         curTally++
                     }
                 }
-                if (curTally > maxVotes) {
+                if (curTally == maxVotes) {
+                    curLead = curLead + " and " + Users.vote_tally[i] + " are tied."
+                } else if (curTally > maxVotes) {
                     curLead = Users.vote_tally[i],
                         maxVotes = curTally
                 }
+                console.log("curLeadddd", curLead)
             }
         }
         Users.voteLead = curLead
-        // console.log("lead: ", curLead)
+        console.log("lead: ", curLead)
+        Users.vote_tally = tmpVoteTally
+        m.redraw()
     },
 
     clearUsers: function() {

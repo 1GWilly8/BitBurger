@@ -1896,7 +1896,7 @@ extend(Transport.prototype, Timeouts);
 module.exports = Transport;
 
 }).call(this,require('_process'))
-},{"../mixins/logging":5,"../mixins/timeouts":7,"../protocol/channel":8,"../util/array":24,"../util/class":26,"../util/cookies":28,"../util/extend":31,"../util/promise":32,"../util/uri":35,"_process":48}],22:[function(require,module,exports){
+},{"../mixins/logging":5,"../mixins/timeouts":7,"../protocol/channel":8,"../util/array":24,"../util/class":26,"../util/cookies":28,"../util/extend":31,"../util/promise":32,"../util/uri":35,"_process":47}],22:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -8562,7 +8562,6 @@ return hooks;
 },{}],40:[function(require,module,exports){
 var m = require("mithril")
 var Home = require("./views/home")
-var NewHome = require("./views/newHome")
 var Landing = require("./views/landing")
 var profile = require("./models/Profile")
 var chat = require("./models/Chat")
@@ -8611,7 +8610,7 @@ m.route(document.body, "/Home", {
         }
     }
 })
-},{"./models/Chat":41,"./models/Profile":43,"./views/home":45,"./views/landing":46,"./views/newHome":47,"mithril":38,"moment":39}],41:[function(require,module,exports){
+},{"./models/Chat":41,"./models/Profile":43,"./views/home":45,"./views/landing":46,"mithril":38,"moment":39}],41:[function(require,module,exports){
 var m = require("mithril");
 var profile = require("./Profile");
 
@@ -8890,7 +8889,7 @@ var Users = {
                         Users.numUsers++
                             // console.log("users++", Users.users_names_list)
                             Users.users_names_list.push(key)
-                            Users.users_list.push(response[0][key])
+                        Users.users_list.push(response[0][key])
                     } else {
                         rmIdValue = false
                     }
@@ -8922,26 +8921,44 @@ var Users = {
     countVotes: function() {
         // console.log("####### count initiated #######")
         // console.log("U.vote_tally", Users.vote_tally)
+        var tmpVoteTally = Users.vote_tally
         var maxVotes = 0
         var curLead = ""
+
+        // Users.vote_tally.forEach(function(itm) {
+        //     if (!itm.__proto__.__proto__) {
+        //         cnt++;
+        //     }
+        // });
+
+            console.log("vote_tally len", Users.vote_tally.length)
         for (var i = 0; i < Users.vote_tally.length; i++) {
+            console.log("entering 1st for loop")
             if (Users.vote_tally[i] != "") {
+                console.log("count non-null space in vote_tally")
                 var curTally = 1
                 for (var j = i + 1; j < Users.vote_tally.length; j++) {
+                    console.log("entering 2nd for loop")
                     if (Users.vote_tally[i] == Users.vote_tally[j]) {
-                        // console.log("count: ", Users.vote_tally[i], curTally + 1)
+                        console.log("vote_tally len", Users.vote_tally)
+                        console.log("instance of match", Users.vote_tally[i])
                         Users.vote_tally[j] = ""
                         curTally++
                     }
                 }
-                if (curTally > maxVotes) {
+                if (curTally == maxVotes) {
+                    curLead = curLead + " and " + Users.vote_tally[i] + " are tied."
+                } else if (curTally > maxVotes) {
                     curLead = Users.vote_tally[i],
                         maxVotes = curTally
                 }
+                console.log("curLeadddd", curLead)
             }
         }
         Users.voteLead = curLead
-        // console.log("lead: ", curLead)
+        console.log("lead: ", curLead)
+        Users.vote_tally = tmpVoteTally
+        m.redraw()
     },
 
     clearUsers: function() {
@@ -9032,6 +9049,10 @@ client.subscribe("/addRest", function(message) {
 client.subscribe("/chat", function(message) {
     console.log("Ishould be getting msg, but I'm not")
     chat.loadMessages()
+    m.redraw()
+});
+
+client.subscribe("/redraw", function(message) {
     m.redraw()
 });
 
@@ -9221,6 +9242,9 @@ module.exports = {
                         m("button.btn_send.", {
                             onclick: function() {
                                 chat.sendMessage(state.chatMessage)
+                                console.log("users.names_list", users.users_names_list)
+                                console.log("users.vote_tally", users.vote_tally)
+                                console.log("users.vote_count", users.vote_count)
                             }
                         }, "Send")
                     ])
@@ -9345,144 +9369,6 @@ module.exports = {
     }
 }
 },{"../models/Chat":41,"../models/Locations":42,"../models/Profile":43,"../models/Users":44,"mithril":38,"moment":39}],47:[function(require,module,exports){
-var m = require("mithril")
-
-module.exports = {
-    view: function(vnode) {
-    	return [
-        m(".row", [
-            m(".header", [
-                m("img[src='food 2.png']")
-            ]),
-            m(".whiteBox",
-                m(".row",
-                    m(".col-md-6", [
-                        m("h1.u-marginTop-62.u-colorHeader.u-fontStyle",
-                            "Today's Options"
-                        ),
-                        m("p.u-color.u-marginBottom-24",
-                            "Select location by clicking the radio button next to location. To change vote click on the vote you choose."
-                        ),
-                        m(".row", [
-                            m(".col-md-6", [
-                                m(".u-fontsize-24", [
-                                    m("input[type='radio']", { style: { "margin-right": "12px" } }),
-                                    "Kroger"
-                                ]),
-                                m("p.u-color",
-                                    "Gus, Dustin, Arrow, Micheal, Lafe, Lamar Jermey, Koby, Chris, Terry, Dee"
-                                )
-                            ]),
-                            m(".col-md-6", [
-                                m("strong.u-fontsize-24", [
-                                    m("input[type='radio']", { style: { "margin-right": "12px" } }),
-                                    "Kroger"
-                                ]),
-                                m("p.u-color",
-                                    "Gus, Dustin, Arrow, Micheal, Lafe, Lamar Jermey, Koby, Chris, Terry, Dee"
-                                )
-                            ]),
-                            m(".col-md-6", [
-                                m("strong.u-fontsize-24", [
-                                    m("input[type='radio']", { style: { "margin-right": "12px" } }),
-                                    "Kroger"
-                                ]),
-                                m("p.u-color",
-                                    "Gus, Dustin, Arrow, Micheal, Lafe, Lamar Jermey, Koby, Chris, Terry, Dee"
-                                )
-                            ]),
-                            m(".col-md-6", [
-                                m("strong.u-fontsize-24", [
-                                    m("input[type='radio']", { style: { "margin-right": "12px" } }),
-                                    "Kroger"
-                                ]),
-                                m("p.u-color",
-                                    "Gus, Dustin, Arrow, Micheal, Lafe, Lamar Jermey, Koby, Chris, Terry, Dee"
-                                )
-                            ])
-                        ]),
-                        m("span.u-color",
-                            " Add a new location to vote. ( 2 more the max )"
-                        ),
-                        m(".input-group.u-heightsize-41.u-marginBottom-24",
-                            m("input.form-control[aria-describedby='basic-addon1'][placeholder='Type Location...'][type='text']")
-                        ),
-                        m(".row",
-                            m(".col-md-12", [
-                                m("span.u-fontSize-18",
-                                    "Currently 0/3rds"
-                                ),
-                                m("p.u-color",
-                                    "will only rest the agreement of 2/3rds of the group"
-                                )
-                            ])
-                        ),
-                        m("button.btn.btn-secondary[type='button']",
-                            "Change Vote"
-                        )
-                    ])
-                )
-            )
-        ]),
-        m("script[src='https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js']"),
-        m("script[crossorigin='anonymous'][integrity='sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa'][src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js']"),
-        m("script[type='text/javascript']", )
-        ]
-    }
-}
-
-
-
-// <head>
-//    <meta charset="utf-8">
-//    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-//    <meta name="viewport" content="width=device-width, initial-scale=1">
-//    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-//    <title></title>
-//    <!-- Latest compiled and minified CSS -->
-//    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-//    <!-- Optional theme -->
-//    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
-//    <link href="https://fonts.googleapis.com/css?family=Roboto:400,400i,700,900" rel="stylesheet">
-//    <link href="http://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet" type="text/css">
-//    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-//    <link rel="stylesheet" type="text/css" href="../../style/css/animation.css">
-//    <link rel="stylesheet" type="text/css" href="../../dist/css/hijro.css">
-//    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-//    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-//    <!--[if lt IE 9]>
-//      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-//      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-//    <![endif]-->
-// </head>
-
-// <!DOCTYPE html>
-// <html>
-
-// <head>
-//    <meta charset="utf-8">
-//    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-//    <meta name="viewport" content="width=device-width, initial-scale=1">
-//    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-//    <title></title>
-//    <!-- Latest compiled and minified CSS -->
-//    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-//    <!-- Optional theme -->
-//    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
-//    <link href="https://fonts.googleapis.com/css?family=Roboto:400,400i,700,900" rel="stylesheet">
-//    <link href="http://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet" type="text/css">
-//    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-//    <link rel="stylesheet" type="text/css" href="../../style/css/animation.css">
-//    <link rel="stylesheet" type="text/css" href="../../dist/css/hijro.css">
-//    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-//    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-//    <!--[if lt IE 9]>
-//      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-//      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-//    <![endif]-->
-// </head>
-// <style type="text/css">
-},{"mithril":38}],48:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
