@@ -28,6 +28,15 @@ var Chat = {
 			url: "http://localhost:8000/Chat",
 			data: data
 		})
+	},
+
+	clear: function() {
+		var data = { "docId": Chat.doc_id, 'reset': true }
+		m.request({
+			method: "PUT",
+			url: "http://localhost:8000/Chat",
+			data: data
+		})
 	}
 
 }

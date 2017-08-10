@@ -1,8 +1,9 @@
 var m = require("mithril")
 
 var Users = {
-    users_doc_id: "595e65fd734d1d25634234d3",
+    users_doc_id: "59836db8f36d2839ce8cd389",
     users_list: [],
+    users_names_list: [],
     vote_tally: [],
     vote_count: [],
     reset_vote: [],
@@ -20,11 +21,12 @@ var Users = {
             })
             .then(function(response) {
                 Users.userIds = response[0]
-                console.log("users__:", userIds)
+                console.log("users__:", Users.userIds)
                 for (key in response[0]) {
                     if (!rmIdValue) {
                         Users.numUsers++
-                            // console.log("users++", Users.numUsers)
+                            // console.log("users++", Users.users_names_list)
+                            Users.users_names_list.push(key)
                             Users.users_list.push(response[0][key])
                     } else {
                         rmIdValue = false
@@ -77,6 +79,15 @@ var Users = {
         }
         Users.voteLead = curLead
         // console.log("lead: ", curLead)
+    },
+
+    clearUsers: function() {
+        var data = { "resetting": true }
+        m.request({
+            method: "PUT",
+            url: "http://localhost:8000/Users/",
+            data: data
+        })
     },
 
     // diff: function() {

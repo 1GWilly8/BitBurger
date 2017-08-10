@@ -85,7 +85,7 @@ module.exports = function(app, db, fayeClient) {
 
         if (req.body.mapping) {
 
-            id = ObjectId("595e65fd734d1d25634234d3");
+            id = ObjectId("59836db8f36d2839ce8cd389");
             var details = { '_id': id };
             var name = req.body.name;
             var nameIdPair = {}
@@ -101,13 +101,36 @@ module.exports = function(app, db, fayeClient) {
                 }
             });
 
+        } else if (req.body.resetting) {
+            id = ObjectId("59836db8f36d2839ce8cd389");
+            var details = { '_id': id };
+            db.collection('Users').deleteMany({ }, (err, result) => {
+                if (err) {
+                    res.send({ 'error': err });
+                } else {
+                    res.send();
+                }
+            });
+            setTimeout(function() {
+                db.collection('Users').insert(details, (err, result) => {
+                    if (err) {
+                        res.send({ 'error': err });
+                    } else {
+                        res.send();
+                    }
+                });
+            }, 600)
         } else {
 
             id = ObjectId(req.body._id);
             var details = { '_id': id };
             var task = { $set: { "vote": req.body.place } };
-            fayeClient.publish("/test", {
-                text: req.body.place
+            // fayeClient.publish("/test", {
+            //     text: req.body.place
+            // });
+            
+            fayeClient.publish("/voteChange", {
+                text: place
             });
 
             db.collection('Users').update(details, task, (err, result) => {
@@ -142,7 +165,7 @@ module.exports = function(app, db, fayeClient) {
     });
 
     app.put('/Meta', (req, res) => {
-        id = ObjectId(req.body._id);
+        id = ObjectId(req.body.docId);
         const details = { '_id': id };
         console.log("ah", details)
         var task = ""
@@ -162,7 +185,7 @@ module.exports = function(app, db, fayeClient) {
     });
 
     app.put('/Restaurants', (req, res) => {
-        id = ObjectId(req.body._id);
+        id = ObjectId(req.body.docId);
         const details = { '_id': id };
         const task = { $set: { "restToAdd": req.body.logInTime } };
         db.collection('Meta').update(details, task, (err, result) => {
